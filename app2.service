@@ -1,0 +1,17 @@
+[Unit]
+Description=Flask App1 - EBS - dlugosc napisu
+After=network.target
+
+[Service]
+User=konrad
+Group=konrad
+WorkingDirectory=/home/konrad/apps/app2/EBS_web
+Environment="PATH=/home/konrad/apps/app2/EBS_web/venv/bin"
+Environment="FLASK_APP=app.py"
+Environment="FLASK_ENV=production"
+ExecStart=/home/konrad/apps/app2/EBS_web/venv/bin/gunicorn -b 127.0.0.1:5002 app:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

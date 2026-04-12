@@ -1,0 +1,17 @@
+[Unit]
+Description=Flask App1 - Kalkulator czasu kroju
+After=network.target
+
+[Service]
+User=konrad
+Group=konrad
+WorkingDirectory=/home/konrad/apps/app1/ck_web/app
+Environment="PATH=/home/konrad/apps/app1/ck_web/app/venv/bin"
+Environment="FLASK_APP=app.py"
+Environment="FLASK_ENV=production"
+ExecStart=/home/konrad/apps/app1/ck_web/app/venv/bin/gunicorn -b 127.0.0.1:5001 app:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
