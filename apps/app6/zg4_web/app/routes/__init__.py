@@ -1,0 +1,1 @@
+# Plik pusty – umożliwia traktowanie katalogu jako pakietu.

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Statystyki</h2>
+
+<div class="filter-panel">
+    <label>Data od: <input type="date" id="start_date" value="{{ start_date }}"></label>
+    <label>Data do: <input type="date" id="end_date" value="{{ end_date }}"></label>
+    <button id="loadStats">Załaduj statystyki</button>
+    <button id="exportStatsExcel">Eksportuj do Excel</button>
+</div>
+
+<div id="totals" style="font-weight: bold; margin: 10px 0;"></div>
+
+<table id="statsTable" class="data-table">
+    <thead>
+        <tr>
+            <th>Kontroler</th>
+            <th>Produkt</th>
+            <th>Liczba raportów</th>
+            <th>Łączne kartony</th>
+            <th>Pełne palety</th>
+            <th>Łączna waga (kg)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Dane wypełniane przez AJAX -->
+    </tbody>
+</table>
+
+<script>
+    // Funkcje do ładowania statystyk – w qc.js
+</script>
+{% endblock %}

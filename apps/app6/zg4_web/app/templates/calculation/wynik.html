@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Wyniki obliczeń</h1>
+
+<p><strong>Kod produktu:</strong> {{ kod }}</p>
+<p><strong>Grupa:</strong> {{ grupa_nazwa }}</p>
+<p><strong>Przedział:</strong> {{ przedzial }}</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Metoda</th>
+            <th>Metry (mtr)</th>   <!-- zmieniono z m² na mtr -->
+            <th>Czas na metr (min)</th>
+            <th>Liczba pracowników</th>
+            <th>Czas całkowity (min)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for w in wyniki %}
+        <tr>
+            <td>{{ w.nazwa }}{% if w.czy_wymuszeni %} (wymuszeni){% endif %}</td>
+            <td>{{ "%.2f"|format(w.metry) }}</td>
+            <td>{{ "%.2f"|format(w.czas_na_metr) }}</td>
+            <td>{{ w.pracownicy }}</td>
+            <td>{{ "%.2f"|format(w.czas_calkowity) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4" class="text-end">CAŁKOWITY CZAS:</th>
+            <th>{{ "%.2f"|format(czas_calkowity) }} min</th>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="mt-3">
+    <a href="{{ url_for('calculation.index') }}" class="btn btn-primary">Nowe obliczenia</a>
+    <form action="{{ url_for('calculation.zapisz') }}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-success">Zapisz obliczenie</button>
+    </form>
+    <a href="{{ url_for('calculation.historia') }}" class="btn btn-info">Historia</a>
+    <a href="{{ url_for('calculation.index') }}" class="btn btn-secondary">Powrót</a>
+</div>
+
+{% if not pokaz_walidacje %}
+<h2 class="mt-4">Walidacja z czasem produkcji</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-md-4">
+            {{ form.czas_produkcji.label(class="form-label") }}
+            {{ form.czas_produkcji(class="form-control") }}
+        </div>
+    </div>
+    <button type="submit" class="btn btn-warning mt-3">Sprawdź odchylenie</button>
+</form>
+{% else %}
+<div class="alert alert-info mt-4">
+    <h4>Wynik walidacji</h4>
+    <p><strong>Czas produkcji:</strong> {{ form.czas_produkcji.data }} min</p>
+    <p><strong>Odchylenie:</strong> {{ "%.2f"|format(odchylenie) }}%</p>
+    <p><strong>Status:</strong> {{ status }}</p>
+</div>
+<a href="{{ url_for('calculation.index') }}" class="btn btn-primary">Nowe obliczenia</a>
+{% endif %}
+{% endblock %}

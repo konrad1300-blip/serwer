@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Edycja czasów: {{ metoda.nazwa }} (grupa {{ grupa.nazwa }})</h1>
+
+<form method="post">
+    {{ form.hidden_tag() }}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Przedział</th>
+                <th>Liczba pracowników</th>
+                <th>Czas na metr (min)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in form.czasy.entries %}
+            <tr>
+                <td>{{ entry.przedzial.data }}</td>
+                <td>{{ entry.pracownicy(class="form-control") }}</td>
+                <td>{{ entry.czas(class="form-control") }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Zapisz</button>
+    <a href="{{ url_for('methods.list', grupa_id=grupa.id) }}" class="btn btn-secondary">Anuluj</a>
+</form>
+{% endblock %}

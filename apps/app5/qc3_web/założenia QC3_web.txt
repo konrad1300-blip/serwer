@@ -1,0 +1,6 @@
+zachowując wszystkie funkcjonalności i wygląd 
+programu przerób go w taki sposób by przy 
+generowaniu dokumenty PDF kożystał z czcionki w 
+folderze fonts. poza tym chciałbym by rekord 
+w bazie danych dawał się kliknięciem wczytać 
+w kalkulator.

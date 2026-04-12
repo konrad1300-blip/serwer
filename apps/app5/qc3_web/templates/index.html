@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Witaj w aplikacji QC Calculator</h1>
+<p>Wybierz kalkulator z menu lub kliknij poniższy przycisk:</p>
+<a href="{{ url_for('qc.form') }}" class="btn">Przejdź do kalkulatora QC</a>
+{% endblock %}

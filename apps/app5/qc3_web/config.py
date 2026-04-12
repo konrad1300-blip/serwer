@@ -1,0 +1,1 @@
+# config.py – możesz dodać później własne ustawienia

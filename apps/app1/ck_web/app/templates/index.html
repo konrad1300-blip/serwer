@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Szacowanie czasu kroju</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    /* Dodatkowe style dla przycisku powrotu do panelu głównego (dostosowane do motywu Serwera Konrada) */
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;  /* Minimalny odstęp między przyciskami */
+        margin-bottom: 20px;
+    }
+    
+.server-home-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #4a4a4a;      /* ten sam kolor co przycisk Oblicz */
+    border: none;                   /* bez ramki, jak Oblicz */
+    border-radius: 50px;            /* takie samo zaokrąglenie */
+    padding: 8px 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: white;                   /* biały tekst od razu */
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    text-align: center;
+}
+
+.server-home-btn:hover {
+    background-color: #2c3e50;      /* ten sam efekt co przy Oblicz */
+    transform: scale(1.02);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    color: white;
+}
+    
+    .help-link {
+        color: #4a4a4a;
+        font-weight: 600;
+        text-decoration: none;
+        background: rgba(0,0,0,0.05);
+        padding: 8px 20px;
+        border-radius: 40px;
+        transition: 0.2s;
+        flex: 1;  /* Zajmuje dostępną przestrzeń */
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .help-link:hover {
+        background: rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+    
+    /* Jeśli chcesz jeszcze mniejszy odstęp (prawie dotykające się) */
+    .top-bar.tight {
+        gap: 5px;
+    }
+    
+    /* Wersja ultra-tight (bez odstępu, ale z oddzielną ramką) */
+    .top-bar.ultra-tight {
+        gap: 0;
+    }
+    
+    .top-bar.ultra-tight .server-home-btn {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    
+    .top-bar.ultra-tight .help-link {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <a href="/" class="server-home-btn">Panel główny</a>
+            <a href="/app1/help" class="help-link">❓ Pomoc</a>
+        </div>
+        <h1>Kalkulator czasu kroju v 0.15</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            <label for="file">Plik DXF:</label>
+            <div class="file-input-wrapper">
+                <input type="file" name="file" id="file" accept=".dxf" required>
+                <label for="file" class="file-label">Przeciągnij na to pole  plik DXF</label>
+            </div>
+
+            <label for="sztuk">Liczba sztuk:</label>
+            <input type="number" name="sztuk" id="sztuk" value="{{ sztuk|default(1) }}" min="1" required>
+
+            <button type="submit">Oblicz</button>
+        </form>
+
+        <!-- Komunikaty błędów -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Wyniki -->
+        {% if results %}
+        <div class="results">
+            <h3>Wyniki dla pliku: {{ filename }}</h3>
+            <div class="result-item">Długość ścieżki: {{ results.dlugosc }} mm</div>
+            <div class="result-item">ZUND – czas na 1 sztukę: {{ results.cz }} min</div>
+            <div class="result-item">LEKTRA – czas na 1 sztukę: {{ results.cl }} min</div>
+            <div class="result-item">JIGWEI – czas na 1 sztukę: {{ results.cw }} min</div>
+            <div class="result-item">ZUND – czysty krój: {{ results.ckz }} min</div>
+            <div class="result-item">LECTRA – czysty krój: {{ results.ckl }} min</div>
+            <div class="result-item">JIGWEI – czysty krój: {{ results.ckw }} min</div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

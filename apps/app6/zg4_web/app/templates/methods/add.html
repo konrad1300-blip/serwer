@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Dodaj metodę do grupy: {{ grupa.nazwa }}</h1>
+
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.nazwa.label(class="form-label") }}
+        {{ form.nazwa(class="form-select") }}
+        {% if form.nazwa.errors %}
+            <div class="text-danger">{{ form.nazwa.errors[0] }}</div>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-success">Dodaj</button>
+    <a href="{{ url_for('methods.list', grupa_id=grupa.id) }}" class="btn btn-secondary">Anuluj</a>
+</form>
+{% endblock %}

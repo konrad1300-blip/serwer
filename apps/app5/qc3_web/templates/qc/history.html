@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Historia raportów</h2>
+
+<div class="filter-panel">
+    <label>Data od: <input type="date" id="start_date" value="{{ start_date }}"></label>
+    <label>Data do: <input type="date" id="end_date" value="{{ end_date }}"></label>
+    <label>Kontroler:
+        <select id="controller_filter">
+            <option value="Wszyscy">Wszyscy</option>
+        </select>
+    </label>
+    <label>Produkt:
+        <select id="product_filter">
+            <option value="Wszystkie">Wszystkie</option>
+        </select>
+    </label>
+    <button id="applyFilters">Filtruj</button>
+    <button id="exportExcel">Eksportuj do Excel</button>
+</div>
+
+<table id="historyTable" class="data-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Numer produktu</th>
+            <th>Data</th>
+            <th>Kontroler</th>
+            <th>Kierunek</th>
+            <th>Paleta</th>
+            <th>Certyfikat</th>
+            <th>Waga szt.</th>
+            <th>Waga palety</th>
+            <th>Kartony</th>
+            <th>Pełne palety</th>
+            <th>Łączna waga</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Dane wypełniane przez AJAX -->
+    </tbody>
+</table>
+
+<script>
+    // Funkcje do ładowania danych, eksportu itp. – zostaną umieszczone w qc.js
+</script>
+{% endblock %}

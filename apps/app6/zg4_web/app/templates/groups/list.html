@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Zarządzanie grupami</h1>
+<a href="{{ url_for('groups.add') }}" class="btn btn-primary mb-3">Dodaj grupę</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Liczba metod</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for grupa in grupy %}
+        <tr>
+            <td>{{ grupa.nazwa }}</td>
+            <td>{{ grupa.metody|length }}</td>
+            <td>
+                <a href="{{ url_for('methods.list', grupa_id=grupa.id) }}" class="btn btn-sm btn-info">Metody</a>
+                <a href="{{ url_for('groups.edit', id=grupa.id) }}" class="btn btn-sm btn-warning">Edytuj</a>
+                <form action="{{ url_for('groups.delete', id=grupa.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno?')">Usuń</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

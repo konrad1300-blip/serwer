@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Obliczanie czasu zgrzewania</h1>
+
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form.kod.label(class="form-label") }}
+            {{ form.kod(class="form-control", placeholder="xxx-xxxx-xxx") }}
+            {% if form.kod.errors %}
+                <div class="text-danger">{{ form.kod.errors[0] }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.grupa_id.label(class="form-label") }}
+            {{ form.grupa_id(class="form-select") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.przedzial.label(class="form-label") }}
+            {{ form.przedzial(class="form-select") }}
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Dalej</button>
+</form>
+{% endblock %}

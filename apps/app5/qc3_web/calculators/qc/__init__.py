@@ -1,0 +1,1 @@
+# oznaczenie pakietu kalkulatora QC3_WEB
