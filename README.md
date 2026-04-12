@@ -1,0 +1,2 @@
+# serwer
+Skonfigurowany serwer Konrada
