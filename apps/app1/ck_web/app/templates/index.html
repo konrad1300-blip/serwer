@@ -95,7 +95,7 @@
             <label for="file">Plik DXF:</label>
             <div class="file-input-wrapper">
                 <input type="file" name="file" id="file" accept=".dxf" required>
-                <label for="file" class="file-label">Przeciągnij na to pole  plik DXF</label>
+<label for="file" class="file-label" id="file-label">Przeciągnij na to pole plik DXF</label>
             </div>
 
             <label for="sztuk">Liczba sztuk:</label>
@@ -127,5 +127,44 @@
         </div>
         {% endif %}
     </div>
+    <script>
+                var label = document.getElementById('file-label');
+                var fileInput = document.getElementById('file');
+
+                label.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    label.classList.add('drag-over');
+                });
+
+                label.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    label.classList.remove('drag-over');
+                });
+
+                label.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    label.classList.remove('drag-over');
+
+                    var files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        updateFileLabel(fileInput);
+                    }
+                });
+
+                function updateFileLabel(input) {
+                    var label = document.getElementById('file-label');
+                    if (input.files.length > 0) {
+                        label.textContent = 'Wybrano: ' + input.files[0].name;
+                        label.classList.add('file-selected');
+                    } else {
+                        label.textContent = 'Przeciągnij na to pole plik DXF';
+                        label.classList.remove('file-selected');
+                    }
+                }
+            </script>
 </body>
 </html>

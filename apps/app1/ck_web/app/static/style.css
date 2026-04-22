@@ -162,6 +162,18 @@ button[type="submit"]:hover {
     border-color: #2c3e50;
 }
 
+.file-label.drag-over {
+    background-color: #d4edda;
+    border-color: #28a745;
+    border-style: solid;
+}
+
+.file-label.file-selected {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+    border-style: solid;
+}
+
 /* Opcjonalnie: styl dla aktywnego wyboru pliku */
 .file-input-wrapper input[type="file"]:focus + .file-label {
     outline: 2px solid #4a4a4a;
