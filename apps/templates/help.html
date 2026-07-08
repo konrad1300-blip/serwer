@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GNPK v0.2 - Instrukcja</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <h1>Instrukcja — GNPK v0.2 Web</h1>
+            <a href="{{ url_for('index') }}" class="server-home-btn" style="text-decoration: none; font-size: 0.9rem; color: #4a4a4a;">← Powrót</a>
+        </div>
+
+        <p>Aplikacja generuje nazwę pliku kroju według schematu:</p>
+        <pre>ilosc_szt + "szt_" + strona + "_" + kolor_pisaka + "_" + material + "_" + opis + "_Wyd" + wydajnosc + "%_" + maszyna + "_" + dlugosc + "mb" + "_" + kod_produktu</pre>
+
+        <h2>Pola formularza</h2>
+        <ul>
+            <li><strong>Ilość sztuk</strong> — liczba sztuk w układzie (wymagane).</li>
+            <li><strong>Materiał</strong> — lista: PVC, Freetarp, Inny.</li>
+            <li><strong>Strona / Orientacja</strong> — L (Lewa), P (Prawa, domyślnie), O (Obie).</li>
+            <li><strong>Kolor pisaka</strong> — Cz (Czarny), S (Srebrny), N (Niebieski), Z (Zielony).</li>
+            <li><strong>Opis elementu</strong> — opcjonalny opis; polskie znaki są usuwane.</li>
+            <li><strong>Wydajność (%)</strong> — opcjonalna wydajność układu w procentach.</li>
+            <li><strong>Maszyna CNC</strong> — Zu (Zund), Jw (Jigwei), Lc (Lectra), Br (Bez różnicy).</li>
+            <li><strong>Długość układu (mb)</strong> — długość układu w metrach bieżących.</li>
+            <li><strong>Kod produktu</strong> — opcjonalny kod w masce <code>xxx-xxxx-xxx</code>; dodawany na końcu nazwy po znaku „_”.</li>
+        </ul>
+    </div>
+</body>
+</html>
