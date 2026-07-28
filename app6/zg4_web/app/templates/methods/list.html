@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Metody w grupie: {{ grupa.nazwa }}</h1>
+<a href="{{ url_for('methods.add', grupa_id=grupa.id) }}" class="btn btn-primary mb-3">Dodaj metodę</a>
+<a href="{{ url_for('groups.list') }}" class="btn btn-secondary mb-3">Powrót do grup</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Lp.</th>
+            <th>Metoda</th>
+            {% for p in przedzialy %}
+                <th>{{ p }}</th>
+            {% endfor %}
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for metoda in grupa.metody %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ metoda.nazwa }}</td>
+            {% for p in przedzialy %}
+                {% set czas = metoda.pobierz_czas(p) %}
+                <td>{{ czas[0] }} os. / {{ "%.2f"|format(czas[1]) }} min</td>
+            {% endfor %}
+            <td>
+                <a href="{{ url_for('methods.edit', metoda_id=metoda.id) }}" class="btn btn-sm btn-warning">Edytuj czasy</a>
+                <form action="{{ url_for('methods.delete', metoda_id=metoda.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno usunąć metodę?')">Usuń</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

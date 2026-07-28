@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edycja konfiguracji</h2>
+
+<form method="POST">
+    <h3>Wagi palet</h3>
+    <label>PLL EURO: <input type="text" name="pallet_euro" value="{{ config['Weights']['pallet_euro'] }}"></label><br>
+    <label>PLL #: <input type="text" name="pallet_industrial" value="{{ config['Weights']['pallet_industrial'] }}"></label><br>
+    <label>PLL Specj.: <input type="text" name="pallet_special" value="{{ config['Weights']['pallet_special'] }}"></label><br>
+    <label>ROLL: <input type="text" name="pallet_roll" value="{{ config['Weights']['pallet_roll'] }}"></label><br>
+    <label>PCKG Paczka: <input type="text" name="pallet_package" value="{{ config['Weights']['pallet_package'] }}"></label><br>
+    <label>PLL ½: <input type="text" name="pallet_half" value="{{ config['Weights']['pallet_half'] }}"></label><br>
+    <label>EURO Karton: <input type="text" name="pallet_euro_carton" value="{{ config['Weights']['pallet_euro_carton'] }}"></label><br>
+    <label>PLL # Karton: <input type="text" name="pallet_ind_carton" value="{{ config['Weights']['pallet_ind_carton'] }}"></label><br>
+    <label>Nadstawka: <input type="text" name="extension" value="{{ config['Weights']['extension'] }}"></label><br>
+    <label>Domyślna waga sztuki: <input type="text" name="default_unit_weight" value="{{ config['Weights']['default_unit_weight'] }}"></label><br>
+
+    <h3>Kontrolerzy</h3>
+    <label>Lista (oddzielone przecinkami): <input type="text" name="controllers" value="{{ config['Controllers']['controllers'] }}" size="50"></label><br>
+    <label>Domyślny: <input type="text" name="default_controller" value="{{ config['Controllers']['default_controller'] }}"></label><br>
+
+    <h3>Ustawienia domyślne</h3>
+    <label>Kierunek wysyłki:
+        <select name="default_shipping">
+            <option value="UE" {% if config['Settings']['default_shipping'] == 'UE' %}selected{% endif %}>UE</option>
+            <option value="Poza UE" {% if config['Settings']['default_shipping'] == 'Poza UE' %}selected{% endif %}>Poza UE</option>
+        </select>
+    </label><br>
+    <label>Rodzaj palety:
+        <select name="default_pallet">
+            <option value="PLL EURO" {% if config['Settings']['default_pallet'] == 'PLL EURO' %}selected{% endif %}>PLL EURO</option>
+            <option value="PLL #" {% if config['Settings']['default_pallet'] == 'PLL #' %}selected{% endif %}>PLL #</option>
+            <option value="PLL Specj." {% if config['Settings']['default_pallet'] == 'PLL Specj.' %}selected{% endif %}>PLL Specj.</option>
+            <option value="ROLL" {% if config['Settings']['default_pallet'] == 'ROLL' %}selected{% endif %}>ROLL</option>
+            <option value="PCKG Paczka" {% if config['Settings']['default_pallet'] == 'PCKG Paczka' %}selected{% endif %}>PCKG Paczka</option>
+            <option value="PLL ½" {% if config['Settings']['default_pallet'] == 'PLL ½' %}selected{% endif %}>PLL ½</option>
+            <option value="EURO Karton" {% if config['Settings']['default_pallet'] == 'EURO Karton' %}selected{% endif %}>EURO Karton</option>
+            <option value="PLL # Karton" {% if config['Settings']['default_pallet'] == 'PLL # Karton' %}selected{% endif %}>PLL # Karton</option>
+        </select>
+    </label><br>
+    <label>Certyfikat:
+        <input type="radio" name="default_certified" value="TAK" {% if config['Settings']['default_certified'] == 'TAK' %}checked{% endif %}> TAK
+        <input type="radio" name="default_certified" value="NIE" {% if config['Settings']['default_certified'] == 'NIE' %}checked{% endif %}> NIE
+    </label><br>
+    <label>Rozmiar palety: <input type="text" name="default_size" value="{{ config['Settings']['default_size'] }}"></label><br>
+    <label>Układanie:
+        <select name="default_stack">
+            <option value="płasko" {% if config['Settings']['default_stack'] == 'płasko' %}selected{% endif %}>płasko</option>
+            <option value="rolowanie" {% if config['Settings']['default_stack'] == 'rolowanie' %}selected{% endif %}>rolowanie</option>
+        </select>
+    </label><br>
+
+    <button type="submit" class="btn">Zapisz konfigurację</button>
+</form>
+{% endblock %}

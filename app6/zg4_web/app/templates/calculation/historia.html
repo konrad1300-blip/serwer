@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Historia obliczeń</h1>
+
+<!-- Formularz wyszukiwania -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('calculation.historia') }}" class="row g-3">
+            <div class="col-md-2">
+                <label for="kod" class="form-label">Kod produktu</label>
+                <input type="text" class="form-control" id="kod" name="kod" value="{{ kod_filter }}" placeholder="Wpisz kod...">
+            </div>
+            <div class="col-md-2">
+                <label for="data_od" class="form-label">Data od</label>
+                <input type="date" class="form-control" id="data_od" name="data_od" value="{{ data_od }}">
+            </div>
+            <div class="col-md-3">
+                <label for="data_do" class="form-label">Data do</label>
+                <input type="date" class="form-control" id="data_do" name="data_do" value="{{ data_do }}">
+            </div>
+            <div class="col-md-5 d-flex align-items-end">
+                <div class="btn-group w-100">
+                    <button type="submit" class="btn btn-primary">Szukaj</button>
+                    <a href="{{ url_for('calculation.historia') }}" class="btn btn-secondary">Wyczyść</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<p>
+    <a href="{{ url_for('calculation.eksport_wszystkie') }}" class="btn btn-success">Eksportuj wszystkie do Excela</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 50px;"></th>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Kod produktu</th>
+            <th>Grupa</th>
+            <th>Przedział</th>
+            <th>Czas całkowity (min)</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in obliczenia %}
+        {% set wyniki = o.wyniki() %}
+        <tr>
+            <td>
+                {% if wyniki %}
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ o.id }}" aria-expanded="false">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                {% endif %}
+            </td>
+            <td>{{ o.id }}</td>
+            <td>{{ o.data.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ o.kod }}</td>
+            <td>{{ o.grupa.nazwa }}</td>
+            <td>{{ o.przedzial }}</td>
+            <td>{{ "%.2f"|format(o.czas_calkowity) }}</td>
+            <td>
+                <a href="{{ url_for('calculation.laduj_do_obliczen', obliczenie_id=o.id) }}" class="btn btn-sm btn-info">Załaduj do obliczeń</a>
+                <a href="{{ url_for('calculation.eksport', obliczenie_id=o.id) }}" class="btn btn-sm btn-success">Eksportuj Excel</a>
+                <form method="POST" action="{{ url_for('calculation.usun', obliczenie_id=o.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć to obliczenie?');">Usuń</button>
+                </form>
+            </td>
+        </tr>
+        {% if wyniki %}
+        <tr class="collapse" id="collapse-{{ o.id }}">
+            <td colspan="8" style="padding: 0;">
+                <div class="p-3" style="background-color: #f9f9f9;">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Metoda</th>
+                                <th>Metry (m²)</th>
+                                <th>Czas na metr (min)</th>
+                                <th>Liczba pracowników</th>
+                                <th>Czas metody (min)</th>
+                                <th>Uwagi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in wyniki %}
+                            <tr>
+                                <td>{{ w.nazwa }}</td>
+                                <td>{{ "%.2f"|format(w.metry) }}</td>
+                                <td>{{ "%.2f"|format(w.czas_na_metr) }}</td>
+                                <td>{{ w.pracownicy }}</td>
+                                <td>{{ "%.2f"|format(w.czas_calkowity) }}</td>
+                                <td>{% if w.czy_wymuszeni %}wymuszeni{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+        {% endif %}
+        {% else %}
+        <tr>
+            <td colspan="8" class="text-center">Brak zapisanych obliczeń.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script>
+    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
+        button.addEventListener('click', function () {
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            }
+        });
+    });
+</script>
+{% endblock %}

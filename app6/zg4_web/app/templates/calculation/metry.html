@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Wprowadź metry zgrzewania</h1>
+<p><strong>Grupa:</strong> {{ grupa.nazwa }} | <strong>Przedział:</strong> {{ przedzial }}</p>
+
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Metoda</th>
+                <th>Metry (mtr)</th>
+                <th>Wymuś pracowników</th>
+                <th>Liczba</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for metoda in grupa.metody %}
+            <tr>
+                <td>{{ metoda.nazwa }}</td>
+                <td>
+                    <input type="number" step="0.01" min="0" name="metry_{{ metoda.id }}" class="form-control" value="0">
+                </td>
+                <td>
+                    <input type="checkbox" name="wymus_{{ metoda.id }}" class="form-check-input" onchange="togglePrac(this, {{ metoda.id }})">
+                </td>
+                <td>
+                    <input type="number" name="prac_{{ metoda.id }}" class="form-control" min="1" max="10" value="1" disabled>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Oblicz</button>
+    <a href="{{ url_for('calculation.index') }}" class="btn btn-secondary">Anuluj</a>
+</form>
+
+<script>
+function togglePrac(checkbox, id) {
+    const input = document.querySelector(`input[name="prac_${id}"]`);
+    input.disabled = !checkbox.checked;
+    if (checkbox.checked) input.focus();
+}
+</script>
+{% endblock %}
