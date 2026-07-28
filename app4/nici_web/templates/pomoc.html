@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomoc - Kalkulator NICI</title>
+<style>
+    body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    nav {
+        background-color: #4a4a4a;
+        padding: 12px 20px;
+        border-radius: 50px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 700px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        margin: 0 15px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    nav a:hover {
+        color: #ddd;
+    }
+
+    nav .nav-btn {
+        background-color: #4a4a4a;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1em;
+        transition: background-color 0.3s, transform 0.2s;
+        display: inline-block;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    nav .nav-btn:hover {
+        background-color: #2c3e50;
+        transform: scale(1.02);
+    }
+
+    .container {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 30px 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        max-width: 700px;
+        width: 100%;
+        margin: 20px;
+    }
+
+    h1 {
+        color: #333;
+        font-size: 2em;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    h2 {
+        color: #4a4a4a;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+    }
+
+    hr {
+        border: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #4a4a4a, transparent);
+        border-radius: 2px;
+        margin: 15px 0;
+    }
+
+    ul, ol {
+        color: #555;
+        line-height: 1.6;
+        padding-left: 20px;
+    }
+
+    li {
+        margin: 8px 0;
+    }
+
+    p {
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .info-box {
+        background-color: #e8f0fe;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 20px 0;
+        border-left: 4px solid #4a4a4a;
+    }
+
+    .info-box p {
+        margin: 5px 0;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #4a4a4a;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index')}}" class="nav-btn">Kalkulator NICI</a>
+        <a href="{{ url_for('pomoc') }}" class="nav-btn">Pomoc</a>
+    </nav>
+    <div class="container">
+        <h1>Pomoc - Kalkulator zużycia nici</h1>
+        <hr>
+
+        <h2>Opis parametrów</h2>
+        <ul>
+            <li><strong>Długość ściegu [m]</strong> - całkowita długość linii szycia w metrach.</li>
+            <li><strong>Gęstość ściegu [na 10cm]</strong> - liczba ściegów na każde 10 centymetrów szycia.</li>
+            <li><strong>Grubość nici</strong> - oznaczenie grubości nici (im niższa liczba, tym grubsza nić).</li>
+            <li><strong>Materiał</strong> - rodzaj materiału podstawowego (wpływa na grubość przeszycia).</li>
+            <li><strong>Ilość warstw</strong> - liczba warstw materiału do przeszycia (1-8).</li>
+            <li><strong>Nawój w metrach</strong> - długość nici na jednej szpulce.</li>
+            <li><strong>Pas poliestrowy / Pas PVC</strong> - dodatkowe pasy wzmacniające w przeszyciu.</li>
+        </ul>
+
+        <div class="info-box">
+            <p><strong>Wzór obliczeniowy:</strong></p>
+            <p>GM = (warstwy × grubość_materiału × mnożnik_nici) + pas_poliestrowy + pas_PVC</p>
+            <p>Zużycie [m] = ((GM × gęstość_ściegu) + (długość_ściegu × 2.61644)) × 1.15</p>
+            <p>Liczba szpulek = zużycie / nawój</p>
+        </div>
+
+        <h2>Mnożniki dla grubości nici</h2>
+        <ul>
+            <li>Nić 10 → mnożnik 1.03</li>
+            <li>Nić 20 → mnożnik 1.00</li>
+            <li>Nić 30 → mnożnik 0.95</li>
+            <li>Nić 40 → mnożnik 0.80</li>
+        </ul>
+
+        <h2>Grubości materiałów [mm]</h2>
+        <ul>
+            <li>PVC 650gr → 0.0004</li>
+            <li>PVC 900gr → 0.0012</li>
+            <li>PVC 1400gr → 0.0022</li>
+            <li>Freetarp → 0.0005</li>
+        </ul>
+
+        <h2>Stałe</h2>
+        <ul>
+            <li>Stała ściegu stebnówkowego (MSTEB): 2.61644</li>
+            <li>Straty technologiczne: 15% (mnożnik 1.15)</li>
+            <li>Grubość pasa poliestrowego: 0.00512 mm</li>
+            <li>Grubość pasa PVC: 0.00482 mm</li>
+        </ul>
+
+        <a href="{{ url_for('index') }}" class="back-link">← Powrót do kalkulatora</a>
+    </div>
+</body>
+</html>
