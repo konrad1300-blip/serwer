@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pomoc - Kalkulator czasu kroju</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Pomoc / Instrukcja</h1>
+        <p><a href="{{ url_for('index') }}">← Powrót do kalkulatora</a></p>
+
+        <h2>Opis działania</h2>
+        <p>Aplikacja służy do szacowania czasu kroju na podstawie plików DXF. Na podstawie długości ścieżki wyznaczonej z pliku oraz liczby sztuk wyliczane są czasy dla trzech typów ploterów: Zund, Lectra i Jigwei.</p>
+
+        <h2>Format pliku</h2>
+        <p>Akceptowane są pliki DXF. Aplikacja odczytuje linie oraz polilinie (LWPOLYLINE, POLYLINE) i sumuje ich długości. Inne obiekty (np. łuki, okręgi) nie są obecnie obsługiwane – w przyszłości planowane jest dodanie.</p>
+
+        <h2>Parametry wejściowe</h2>
+        <ul>
+            <li><strong>Plik DXF</strong> – przeciągnij lub kliknij w pole i wybierz plik z dysku.</li>
+            <li><strong>Liczba sztuk</strong> – liczba powtórzeń (np. elementów na arkuszu), na które dzielony jest całkowity czas czystego kroju. Wpływ na wynik: im więcej sztuk, tym mniejszy czas jednostkowy.</li>
+        </ul>
+
+        <h2>Mnożniki i wzory</h2>
+        <p>Czas czystego kroju (dla całego pliku) liczony jest ze wzoru:</p>
+        <pre>czas = (długość ścieżki * Mnożnik_maszyny * Mnożnik_ramki) / 60</pre>
+        <p>a czas na jedną sztukę to:</p>
+        <pre>czas_jedn = czas_czysty / liczba_sztuk</pre>
+        <p>Stosowane stałe:</p>
+        <ul>
+            <li>MCKZ (Zund) = 0.08307067</li>
+            <li>MCKL (Lectra) = 0.090474006</li>
+            <li>MCKJ (Jigwei) = 0.101171631</li>
+            <li>MR (mnożnik ramki) = 1.08748</li>
+        </ul>
+
+        <h2>Interpretacja wyników</h2>
+        <p>Wyniki prezentowane są w minutach, z zaokrągleniem do dwóch miejsc po przecinku:</p>
+        <ul>
+            <li><strong>Długość ścieżki</strong> – całkowita długość (w mm) wszystkich odczytanych elementów.</li>
+            <li><strong>Czas na 1 sztukę</strong> – dla każdej maszyny.</li>
+            <li><strong>Czysty krój</strong> – całkowity czas cięcia dla całego pliku (bez podziału na sztuki).</li>
+        </ul>
+
+        <h2>Zgłaszanie błędów / uwagi</h2>
+        <p>W przypadku problemów z odczytem pliku lub błędnych wyników, skontaktuj się z Konradem Piaskowskim - <a href="mailto:konrad@hansaa.com">konrad@hansaa.com</a></p>
+        <p style="margin-top: 2em;"><a href="/app1/">← Powrót do kalkulatora</a></p>
+        <p style="margin-top: 2em;"><a href="/app1/">Wróć do kalkulatora</a></p>
+    </div>
+</body>
+</html>
