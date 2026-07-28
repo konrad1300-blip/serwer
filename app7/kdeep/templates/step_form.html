@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">{{ title }} – Projekt: {{ project.name }}</div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">{{ form.step_template_id.label }} {{ form.step_template_id(class="form-select") }}</div>
+                    <div class="mb-3">{{ form.name.label }} {{ form.name(class="form-control", id="name") }}</div>
+                    <div class="mb-3">{{ form.description.label }} {{ form.description(class="form-control", rows=2, id="description") }}</div>
+                    <div class="mb-3">{{ form.planned_hours.label }} {{ form.planned_hours(class="form-control", step="0.5", id="planned_hours") }}</div>
+                    <div class="mb-3">{{ form.required_roles.label }} {{ form.required_roles(class="form-control", placeholder="np. technolog,konstruktor", id="required_roles") }}</div>
+                    <div class="mb-3">{{ form.assigned_user_id.label }} {{ form.assigned_user_id(class="form-select") }}</div>
+                    <div class="mb-3">{{ form.priority.label }} {{ form.priority(class="form-select") }}</div>
+                    <button type="submit" class="btn btn-primary">Zapisz krok</button>
+                    <a href="{{ url_for('project_steps', project_id=project.id) }}" class="btn btn-secondary">Anuluj</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('step_template_id').addEventListener('change', function() {
+    var tplId = this.value;
+    if (tplId && tplId != '0') {
+        fetch(`/api/step_template/${tplId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('name').value = data.name;
+                document.getElementById('description').value = data.description;
+                document.getElementById('planned_hours').value = data.planned_hours;
+                document.getElementById('required_roles').value = data.required_roles;
+            });
+    }
+});
+</script>
+{% endblock %}

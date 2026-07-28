@@ -1,0 +1,28 @@
+projekt_kitzen/
+│
+├── app.py                 # Główny plik aplikacji: konfiguracja, baza danych, modele (User, Project, Step, TimeLog, LogEntry, szablony), formularze, widoki (dashboard, projekty, kroki, zarządzanie użytkownikami, archiwum, kalendarz, wykresy, logi, raporty PDF, szablony projektów/kroków, API), dekoratory, funkcje pomocnicze (generowanie wykresów, obsługa czasu, raporty)
+├── requirements.txt       # Zależności: Flask, Flask-SQLAlchemy, Flask-Login, Flask-WTF, WTForms, matplotlib, pandas, weasyprint, python-dateutil, pillow
+├── instance/
+│   └── kitzen.db          # Plik bazy SQLite (tworzony automatycznie przy pierwszym uruchomieniu)
+├── templates/
+│   ├── base.html          # Wspólny szablon z nawigacją (menu: Pulpit, Projekty, Kalendarz, Wykresy, Dziennik; dla admina: zarządzanie użytkownikami, archiwum, szablony) – brak systemu powiadomień (dzwonek usunięty)
+│   ├── login.html         # Formularz logowania
+│   ├── dashboard.html     # Pulpit użytkownika: lista zadań (przypisane lub nieprzypisane), liczniki statusów (todo/in_progress/done), wykresy obciążenia i ról, formularze generowania raportów PDF (moje zadania i raport zespołu dla admina)
+│   ├── projects.html      # Lista aktywnych projektów (kafelki z paskiem postępu – ukończone kroki / wszystkie kroki)
+│   ├── project_form.html  # Formularz tworzenia/edycji projektu (z wyborem szablonu projektu z bazy)
+│   ├── project_steps.html # Widok kroków w projekcie (lista z przyciskami zmiany statusu, edycji, usuwania)
+│   ├── step_form.html     # Formularz dodawania/edycji kroku (z możliwością wyboru szablonu kroku oraz przypisania użytkownika, priorytetu)
+│   ├── admin_users.html   # Zarządzanie użytkownikami (lista, dodawanie, edycja, usuwanie) – tylko admin
+│   ├── user_form.html     # Formularz dodawania/edycji użytkownika (rola, nieobecności, hasło)
+│   ├── archive.html       # Archiwum projektów (przywracanie lub trwałe usuwanie) – tylko admin
+│   ├── calendar.html      # Kalendarz z terminami projektów i nieobecnościami użytkowników (FullCalendar)
+│   ├── charts.html        # Strona z wykresami: przepływ zadań (ostatnie 30 dni), obciążenie pracowników, wąskie gardła, zadania oczekujące wg roli, planowane vs rzeczywiste (dla ukończonych zadań)
+│   ├── logs.html          # Dziennik zdarzeń systemowych (paginacja, automatyczne usuwanie wpisów starszych niż 3 miesiące) – tylko admin
+│   ├── kanban.html        # Tablica Kanban (kolumny: Do zrobienia, W trakcie/Wstrzymane, Zrobione) z przeciąganiem elementów (SortableJS) – aktualizacja statusu przez API
+│   ├── tasks_pdf.html     # Szablon HTML dla raportów PDF (moje zadania lub raport zespołu) – używany przez WeasyPrint
+│   ├── admin_project_templates.html   # Lista szablonów projektów (zarządzanie: dodawanie, edycja, usuwanie) – tylko admin
+│   ├── project_template_form.html     # Formularz dodawania/edycji szablonu projektu (oraz zarządzanie jego krokami)
+│   ├── admin_step_templates.html      # Lista samodzielnych szablonów kroków (zarządzanie) – tylko admin
+│   └── step_template_form.html        # Formularz dodawania/edycji szablonu kroku (samodzielnego lub w ramach szablonu projektu)
+└── static/
+    └── style.css           # Własne style: szare tło, karty, paski postępu, kolory statusów (todo/in_progress/done), responsywność, style dla Kanban, toasty (choć system powiadomień wyłączony), wykresy

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Raport zadań</title>
+    <style>
+        body {
+            font-family: 'DejaVu Sans', 'Segoe UI', Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        h1 { font-size: 20px; margin-bottom: 5px; color: #1e6fdf; }
+        h2 { font-size: 16px; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #ccc; }
+        h3 { font-size: 14px; margin-top: 15px; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; word-wrap: break-word; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .status-todo { background-color: #6c757d; color: white; }
+        .status-in_progress { background-color: #ffc107; color: black; }
+        .status-done { background-color: #198754; color: white; }
+        .footer { margin-top: 30px; font-size: 10px; text-align: center; color: #777; border-top: 1px solid #eee; padding-top: 10px; }
+        .page-break { page-break-before: always; }
+    </style>
+</head>
+<body>
+
+{% if report_type == 'user' %}
+    <h1>Raport zadań użytkownika: {{ user.username }}</h1>
+    <p>Okres: od {{ start_date if start_date else 'początku' }} do {{ end_date if end_date else 'teraz' }}</p>
+
+    <h2>Zadania do wykonania (TODO)</h2>
+    {% if tasks.todo %}
+    <table>
+        <thead>
+            <tr><th>Projekt</th><th>Nazwa zadania</th><th>Priorytet</th><th>Planowane godz.</th><th>Wymagane role</th><th>Realny czas (h)</th><th>Data aktualizacji</th></tr>
+        </thead>
+        <tbody>
+        {% for task in tasks.todo %}
+        <tr>
+            <td>{{ task.project.name }}</td>
+            <td>{{ task.name }}</td>
+            <td>{{ task.priority|capitalize }}</td>
+            <td>{{ task.planned_hours }}</td>
+            <td>{{ task.required_roles or '-' }}</td>
+            <td>-</td>
+            <td>{{ task.status_updated_at.strftime('%Y-%m-%d') if task.status_updated_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p>Brak zadań w tym statusie.</p>{% endif %}
+
+    <h2>Zadania w trakcie (IN PROGRESS)</h2>
+    {% if tasks.in_progress %}
+    <table>
+        <thead><tr><th>Projekt</th><th>Nazwa zadania</th><th>Priorytet</th><th>Planowane godz.</th><th>Wymagane role</th><th>Realny czas (h)</th><th>Data aktualizacji</th></tr></thead>
+        <tbody>
+        {% for task in tasks.in_progress %}
+        <tr>
+            <td>{{ task.project.name }}</td>
+            <td>{{ task.name }}</td>
+            <td>{{ task.priority|capitalize }}</td>
+            <td>{{ task.planned_hours }}</td>
+            <td>{{ task.required_roles or '-' }}</td>
+            <td>-</td>
+            <td>{{ task.status_updated_at.strftime('%Y-%m-%d') if task.status_updated_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p>Brak zadań w tym statusie.</p>{% endif %}
+
+    <h2>Zadania zakończone (DONE)</h2>
+    {% if tasks.done %}
+    <table>
+        <thead><tr><th>Projekt</th><th>Nazwa zadania</th><th>Priorytet</th><th>Planowane godz.</th><th>Wymagane role</th><th>Realny czas (h)</th><th>Data ukończenia</th></tr></thead>
+        <tbody>
+        {% for task in tasks.done %}
+        <tr>
+            <td>{{ task.project.name }}</td>
+            <td>{{ task.name }}</td>
+            <td>{{ task.priority|capitalize }}</td>
+            <td>{{ task.planned_hours }}</td>
+            <td>{{ task.required_roles or '-' }}</td>
+            <td>{{ task.actual_hours if task.actual_hours else '-' }}</td>
+            <td>{{ task.status_updated_at.strftime('%Y-%m-%d') if task.status_updated_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p>Brak zadań zakończonych w tym okresie.</p>{% endif %}
+
+{% else %}
+    <h1>Raport zadań całego zespołu</h1>
+    <p>Okres: od {{ start_date if start_date else 'początku' }} do {{ end_date if end_date else 'teraz' }}</p>
+    
+    {% for user, tasks in tasks_by_user.items() %}
+        <div {% if not loop.first %}class="page-break"{% endif %}>
+            <h2>{{ user.username if user else 'Zadania nieprzypisane (tylko role)' }}</h2>
+            
+            <h3>Do wykonania</h3>
+            {% if tasks.todo %}
+            <table><thead><tr><th>Projekt</th><th>Nazwa zadania</th><th>Priorytet</th><th>Godz.</th><th>Role</th><th>Realny czas (h)</th><th>Data akt.</th></tr></thead>
+            <tbody>{% for t in tasks.todo %}<tr><td>{{ t.project.name }}</td><td>{{ t.name }}</td><td>{{ t.priority|capitalize }}</td><td>{{ t.planned_hours }}</td><td>{{ t.required_roles or '-' }}</td><td>-</td><td>{{ t.status_updated_at.strftime('%Y-%m-%d') if t.status_updated_at else '-' }}</td></tr>{% endfor %}</tbody></table>
+            {% else %}<p>Brak</p>{% endif %}
+            
+            <h3>W trakcie</h3>
+            {% if tasks.in_progress %}
+            <table><thead><tr><th>Projekt</th><th>Nazwa zadania</th><th>Priorytet</th><th>Godz.</th><th>Role</th><th>Realny czas (h)</th><th>Data akt.</th></tr></thead>
+            <tbody>{% for t in tasks.in_progress %}<tr><td>{{ t.project.name }}</td><td>{{ t.name }}</td><td>{{ t.priority|capitalize }}</td><td>{{ t.planned_hours }}</td><td>{{ t.required_roles or '-' }}</td><td>-</td><td>{{ t.status_updated_at.strftime('%Y-%m-%d') if t.status_updated_at else '-' }}</td></tr>{% endfor %}</tbody></table>
+            {% else %}<p>Brak</p>{% endif %}
+            
+            <h3>Zakończone</h3>
+            {% if tasks.done %}
+            <table><thead><tr><th>Projekt</th><th>Nazwa zadania</th><th>Priorytet</th><th>Godz.</th><th>Role</th><th>Realny czas (h)</th><th>Data ukończenia</th></tr></thead>
+            <tbody>{% for t in tasks.done %}<tr><td>{{ t.project.name }}</td><td>{{ t.name }}</td><td>{{ t.priority|capitalize }}</td><td>{{ t.planned_hours }}</td><td>{{ t.required_roles or '-' }}</td><td>{{ t.actual_hours if t.actual_hours else '-' }}</td><td>{{ t.status_updated_at.strftime('%Y-%m-%d') if t.status_updated_at else '-' }}</td></tr>{% endfor %}</tbody></table>
+            {% else %}<p>Brak</p>{% endif %}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="footer">
+    Wygenerowano: {{ now.strftime('%Y-%m-%d %H:%M') }} przez KIT-zen
+</div>
+</body>
+</html>

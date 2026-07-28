@@ -1,0 +1,26 @@
+<!-- templates/archive.html -->
+{% extends "base.html" %}
+{% block content %}
+<h3><i class="fas fa-archive"></i> Archiwum projektów</h3>
+<hr>
+{% if projects %}
+<table class="table table-sm table-secondary">
+    <thead><tr><th>Nazwa</th><th>Utworzony</th><th>Termin</th><th>Akcje</th></tr></thead>
+    <tbody>
+    {% for p in projects %}
+    <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+        <td>{{ p.deadline if p.deadline else 'brak' }}</td>
+        <td>
+            <a href="{{ url_for('restore_project', project_id=p.id) }}" class="btn btn-sm btn-success">Przywróć</a>
+            <a href="{{ url_for('delete_project', project_id=p.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Trwale usunąć?')">Usuń</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-light">Archiwum jest puste.</div>
+{% endif %}
+{% endblock %}

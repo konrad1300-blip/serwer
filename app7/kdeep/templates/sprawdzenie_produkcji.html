@@ -1,0 +1,540 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .page-header-premium {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .page-header-premium::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
+    .stat-card-premium {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    .stat-card-premium:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+    }
+    .table-premium {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+    .table-premium th {
+        background-color: #2a5298;
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        border: none;
+        padding: 1rem;
+    }
+    .table-premium td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f9;
+        font-size: 0.95rem;
+    }
+    .table-premium tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    .table-premium tbody tr:hover {
+        background-color: #f8fafe;
+    }
+    .table-premium tbody tr.row-checked {
+        background-color: #eefdf6;
+        opacity: 0.9;
+    }
+    .table-premium tbody tr.row-checked td {
+        border-bottom-color: #d1f7e3;
+    }
+    /* Styl przełącznika */
+    .form-switch .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        cursor: pointer;
+        transition: background-position .15s ease-in-out, background-color 0.2s ease;
+    }
+    .form-switch .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+    .search-input-group {
+        border-radius: 2rem;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .search-input-group .form-control {
+        border: 1px solid #e2e8f0;
+        padding-left: 1.5rem;
+    }
+    .search-input-group .btn {
+        background-color: #2a5298;
+        color: white;
+        border: none;
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+    }
+    .sync-btn {
+        border-radius: 2rem;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+        transition: all 0.3s ease;
+    }
+    .sync-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+    }
+    
+    /* Overlay ładowania */
+    #loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        flex-direction: column;
+    }
+    .spinner-custom {
+        width: 4rem;
+        height: 4rem;
+        border-width: 0.45em;
+    }
+    .progress-bar-premium {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e9ecef;
+    }
+    .progress-bar-premium .progress-bar {
+        border-radius: 4px;
+        background: linear-gradient(90deg, #28a745, #198754);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Overlay ładowania podczas synchronizacji -->
+<div id="loading-overlay">
+    <div class="spinner-border text-primary spinner-custom mb-3" role="status">
+        <span class="visually-hidden">Ładowanie...</span>
+    </div>
+    <h4 class="fw-bold mb-1">Nawiązywanie połączenia z ERPXL...</h4>
+    <p class="text-light">To może potrwać kilka sekund. Proszę czekać.</p>
+</div>
+
+<!-- Nagłówek strony -->
+<div class="page-header-premium d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h1 class="fw-bold m-0"><i class="fas fa-clipboard-check me-2"></i>Sprawdzenie produkcji</h1>
+        <p class="m-0 mt-2 text-white-50">Dwuetapowa check-lista planu produkcyjnego na najbliższe 2 tygodnie (od {{ today.strftime('%Y-%m-%d') }} do {{ two_weeks_forward.strftime('%Y-%m-%d') }})</p>
+    </div>
+    <div>
+        <form action="{{ url_for('sprawdzenie_produkcji_sync') }}" method="POST" id="sync-form">
+            <button type="submit" class="btn btn-light btn-lg sync-btn text-primary">
+                <i class="fas fa-sync-alt me-2 animate-spin-hover"></i>Uaktualnij dane z ERPXL
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Sekcja statystyk -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card-premium p-3 mb-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted text-uppercase small m-0 fw-bold">Wszystkie produkty</h6>
+                    <h3 class="fw-bold mt-2 mb-0" id="total-count-display">{{ total_count }}</h3>
+                </div>
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3">
+                    <i class="fas fa-list-ol fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card-premium p-3 mb-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-success text-uppercase small m-0 fw-bold">Sprawdzone</h6>
+                    <h3 class="fw-bold mt-2 mb-0 text-success" id="checked-count-display">{{ checked_count }}</h3>
+                </div>
+                <div class="bg-success bg-opacity-10 text-success rounded-circle p-3">
+                    <i class="fas fa-check-circle fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card-premium p-3 mb-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-warning text-uppercase small m-0 fw-bold">Oczekujące</h6>
+                    <h3 class="fw-bold mt-2 mb-0 text-warning" id="unchecked-count-display">{{ unchecked_count }}</h3>
+                </div>
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3">
+                    <i class="fas fa-hourglass-half fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card-premium p-3 mb-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="w-100">
+                    <h6 class="text-muted text-uppercase small m-0 fw-bold">Ukończono weryfikację</h6>
+                    <h3 class="fw-bold mt-2 mb-2 text-dark" id="progress-pct-display">{{ progress_pct }}%</h3>
+                    <div class="progress progress-bar-premium">
+                        <div class="progress-bar" id="progress-bar-display" role="progressbar" style="width: {{ progress_pct }}%;" aria-valuenow="{{ progress_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Główna zawartość -->
+<div class="card border-0 shadow-sm p-4 mb-4" style="background: rgba(255, 255, 255, 0.95); border-radius: 1rem;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <h4 class="fw-bold text-dark m-0">Lista zleceń produkcyjnych</h4>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <!-- Filtr Statusu -->
+            <div class="input-group search-input-group" style="width: 180px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-filter"></i></span>
+                <select id="filter-status" class="form-select border-start-0">
+                    <option value="all">Wszystkie statusy</option>
+                    <option value="checked">Sprawdzone</option>
+                    <option value="unchecked">Oczekujące</option>
+                </select>
+            </div>
+            
+            <!-- Filtr Kodu Produktu -->
+            <div class="input-group search-input-group" style="width: 220px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
+                <select id="filter-kod" class="form-select border-start-0">
+                    <option value="all">Wszystkie produkty</option>
+                    <!-- Wygenerowane dynamicznie -->
+                </select>
+            </div>
+
+            <!-- Filtr Zlecenia (ZP) -->
+            <div class="input-group search-input-group" style="width: 180px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                <select id="filter-zp" class="form-select border-start-0">
+                    <option value="all">Wszystkie zlecenia</option>
+                    <!-- Wygenerowane dynamicznie -->
+                </select>
+            </div>
+
+            <!-- Filtr DizałlZP -->
+            <div class="input-group search-input-group" style="width: 180px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-industry"></i></span>
+                <select id="filter-dizallzp" class="form-select border-start-0">
+                    <option value="all">Wszystkie działy</option>
+                    <!-- Wygenerowane dynamicznie -->
+                </select>
+            </div>
+
+            <!-- Pole wyszukiwania -->
+            <div class="input-group search-input-group" style="width: 220px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-search"></i></span>
+                <input type="text" id="table-search" class="form-control border-start-0" placeholder="Szukaj...">
+            </div>
+        </div>
+    </div>
+
+    {% if items %}
+    <div class="table-responsive">
+        <table class="table table-premium w-100" id="plan-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%">Lp.</th>
+                    <th style="width: 20%">Kod Produktu</th>
+                    <th style="width: 15%">Zlecenie (ZP)</th>
+                    <th style="width: 15%">Dział ZP</th>
+                    <th style="width: 15%">Data aktywacji</th>
+                    <th style="width: 10%">Kolejność</th>
+                    <th style="width: 15%">Weryfikacja</th>
+                    <th style="width: 5%" class="text-center">Sprawdzono</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr id="row-{{ item.pzl_id }}" class="{% if item.sprawdzono %}row-checked{% endif %}">
+                    <td>{{ loop.index }}</td>
+                    <td><span class="badge bg-light text-dark p-2 border fw-semibold">{{ item.prod_kod }}</span></td>
+                    <td><span class="text-primary fw-bold">{{ item.zp or '-' }}</span></td>
+                    <td><span class="text-secondary fw-semibold">{{ item.dizallzp or '-' }}</span></td>
+                    <td>
+                        {% if item.data_aktywacji %}
+                            <i class="far fa-calendar-alt me-1 text-muted"></i>{{ item.data_aktywacji.strftime('%Y-%m-%d') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">{{ item.row_number or '-' }}</span>
+                    </td>
+                    <td id="verifier-{{ item.pzl_id }}">
+                        {% if item.sprawdzono %}
+                            <div class="small">
+                                <span class="text-success fw-bold"><i class="fas fa-check-double me-1"></i>Sprawdzony</span><br>
+                                <span class="text-muted">{{ item.checked_by }}</span><br>
+                                <span class="text-muted" style="font-size: 0.75rem;">{{ item.checked_at.strftime('%Y-%m-%d %H:%M') if item.checked_at }}</span>
+                            </div>
+                        {% else %}
+                            <div class="small text-muted">
+                                <i class="fas fa-clock me-1 text-warning"></i>Oczekuje na weryfikację
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="form-check form-switch d-inline-block">
+                            <input class="form-check-input toggle-status-btn" type="checkbox" role="switch" 
+                                   data-pzl-id="{{ item.pzl_id }}" {% if item.sprawdzono %}checked{% endif %}>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="text-muted mb-3"><i class="fas fa-database fa-3x"></i></div>
+        <h5 class="fw-bold text-secondary">Brak danych produkcyjnych w bazie lokalnej</h5>
+        <p class="text-muted">Kliknij przycisk „Uaktualnij dane z ERPXL” u góry, aby połączyć się z bazą i pobrać aktualny plan.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicjalizacja filtrów dynamicznych
+        populateProductFilter();
+        populateZpFilter();
+        populateDizallzpFilter();
+
+        // Pokazywanie overlay przy wysyłaniu formularza
+        $('#sync-form').on('submit', function() {
+            $('#loading-overlay').css('display', 'flex');
+        });
+
+        // Bindowanie akcji filtrowania
+        $('#table-search').on('keyup', applyFilters);
+        $('#filter-status').on('change', applyFilters);
+        $('#filter-kod').on('change', applyFilters);
+        $('#filter-zp').on('change', applyFilters);
+        $('#filter-dizallzp').on('change', applyFilters);
+
+        // Funkcja głównego filtrowania
+        function applyFilters() {
+            var searchValue = $('#table-search').val().toLowerCase();
+            var statusFilter = $('#filter-status').val();
+            var kodFilter = $('#filter-kod').val();
+            var zpFilter = $('#filter-zp').val();
+            var dizallzpFilter = $('#filter-dizallzp').val();
+
+            $('#plan-table tbody tr').each(function() {
+                var row = $(this);
+                var rowText = row.text().toLowerCase();
+                
+                // 1. Sprawdzamy status (klasa row-checked)
+                var hasCheckedClass = row.hasClass('row-checked');
+                var statusMatch = true;
+                if (statusFilter === 'checked') {
+                    statusMatch = hasCheckedClass;
+                } else if (statusFilter === 'unchecked') {
+                    statusMatch = !hasCheckedClass;
+                }
+
+                // 2. Sprawdzamy Kod Produktu (kolumna indeks 1)
+                var kodText = row.find('td').eq(1).text().trim();
+                var kodMatch = (kodFilter === 'all') || (kodText === kodFilter);
+
+                // 3. Sprawdzamy Zlecenie ZP (kolumna indeks 2)
+                var zpText = row.find('td').eq(2).text().trim();
+                var zpMatch = (zpFilter === 'all') || (zpText === zpFilter);
+
+                // 3.5. Sprawdzamy Dział ZP (kolumna indeks 3)
+                var dizallzpText = row.find('td').eq(3).text().trim();
+                var dizallzpMatch = (dizallzpFilter === 'all') || (dizallzpText === dizallzpFilter);
+
+                // 4. Sprawdzamy wyszukiwarkę tekstową
+                var textMatch = rowText.indexOf(searchValue) > -1;
+
+                // Pokazujemy/ukrywamy wiersz
+                if (statusMatch && kodMatch && zpMatch && dizallzpMatch && textMatch) {
+                    row.show();
+                } else {
+                    row.hide();
+                }
+            });
+
+            // Aktualizacja Lp. widocznych wierszy
+            updateRowNumbers();
+        }
+
+        // Aktualizacja numeracji widocznych wierszy (Lp.)
+        function updateRowNumbers() {
+            var counter = 1;
+            $('#plan-table tbody tr:visible').each(function() {
+                $(this).find('td').first().text(counter++);
+            });
+        }
+
+        // Generowanie opcji filtra dla Kodów Produktu
+        function populateProductFilter() {
+            var uniqueKods = new Set();
+            $('#plan-table tbody tr').each(function() {
+                var kodText = $(this).find('td').eq(1).text().trim();
+                if (kodText && kodText !== '-') {
+                    uniqueKods.add(kodText);
+                }
+            });
+            var sortedKods = Array.from(uniqueKods).sort();
+            sortedKods.forEach(function(kod) {
+                $('#filter-kod').append(new Option(kod, kod));
+            });
+        }
+
+        // Generowanie opcji filtra dla Zleceń (ZP)
+        function populateZpFilter() {
+            var uniqueZps = new Set();
+            $('#plan-table tbody tr').each(function() {
+                var zpText = $(this).find('td').eq(2).text().trim();
+                if (zpText && zpText !== '-') {
+                    uniqueZps.add(zpText);
+                }
+            });
+            var sortedZps = Array.from(uniqueZps).sort();
+            sortedZps.forEach(function(zp) {
+                $('#filter-zp').append(new Option(zp, zp));
+            });
+        }
+
+        // Generowanie opcji filtra dla Działu ZP (DizałlZP)
+        function populateDizallzpFilter() {
+            var uniqueDizs = new Set();
+            $('#plan-table tbody tr').each(function() {
+                var dizText = $(this).find('td').eq(3).text().trim();
+                if (dizText && dizText !== '-') {
+                    uniqueDizs.add(dizText);
+                }
+            });
+            var sortedDizs = Array.from(uniqueDizs).sort();
+            sortedDizs.forEach(function(diz) {
+                $('#filter-dizallzp').append(new Option(diz, diz));
+            });
+        }
+
+        // Obsługa AJAX dla zmiany checkboxa "sprawdzono"
+        $('.toggle-status-btn').on('change', function() {
+            var inputElement = $(this);
+            var pzlId = inputElement.data('pzl-id');
+            var isChecked = inputElement.is(':checked');
+            var rowElement = $('#row-' + pzlId);
+            var verifierElement = $('#verifier-' + pzlId);
+
+            inputElement.prop('disabled', true);
+
+            $.ajax({
+                url: "{{ url_for('sprawdzenie_produkcji_toggle') }}",
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    pzl_id: pzlId,
+                    checked: isChecked
+                }),
+                success: function(response) {
+                    inputElement.prop('disabled', false);
+                    if (response.status === 'success') {
+                        if (isChecked) {
+                            rowElement.addClass('row-checked');
+                            var now = new Date();
+                            var formattedDate = now.getFullYear() + '-' + 
+                                                String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                                                String(now.getDate()).padStart(2, '0') + ' ' + 
+                                                String(now.getHours()).padStart(2, '0') + ':' + 
+                                                String(now.getMinutes()).padStart(2, '0');
+                            
+                            verifierElement.html(`
+                                <div class="small">
+                                    <span class="text-success fw-bold"><i class="fas fa-check-double me-1"></i>Sprawdzony</span><br>
+                                    <span class="text-muted">{{ current_user.username }}</span><br>
+                                    <span class="text-muted" style="font-size: 0.75rem;">${formattedDate}</span>
+                                </div>
+                            `);
+                        } else {
+                            rowElement.removeClass('row-checked');
+                            verifierElement.html(`
+                                <div class="small text-muted">
+                                    <i class="fas fa-clock me-1 text-warning"></i>Oczekuje na weryfikację
+                                </div>
+                            `);
+                        }
+                        
+                        updateStats();
+                        applyFilters(); // Odśwież filtrowanie (wiersz może zniknąć jeśli odznaczono w widoku "Sprawdzone")
+                    } else {
+                        inputElement.prop('checked', !isChecked);
+                        alert('Błąd podczas zapisywania zmian.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    inputElement.prop('disabled', false);
+                    inputElement.prop('checked', !isChecked);
+                    alert('Wystąpił błąd komunikacji z serwerem: ' + error);
+                }
+            });
+        });
+
+        // Funkcja do dynamicznej aktualizacji statystyk
+        function updateStats() {
+            var total = $('#plan-table tbody tr').length;
+            var checked = $('#plan-table tbody tr.row-checked').length;
+            var unchecked = total - checked;
+            var pct = total > 0 ? Math.round((checked / total) * 100 * 10) / 10 : 0;
+
+            $('#checked-count-display').text(checked);
+            $('#unchecked-count-display').text(unchecked);
+            $('#progress-pct-display').text(pct + '%');
+            $('#progress-bar-display')
+                .css('width', pct + '%')
+                .attr('aria-valuenow', pct);
+        }
+    });
+</script>
+{% endblock %}

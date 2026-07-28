@@ -1,0 +1,74 @@
+<!-- templates/project_steps.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+    <h3><i class="fas fa-list-check"></i> Projekt: {{ project.name }}</h3>
+    {% if can_edit %}<a href="{{ url_for('add_step', project_id=project.id) }}" class="btn btn-sm btn-success"><i class="fas fa-plus"></i> Dodaj krok</a>{% endif %}
+</div>
+<p class="text-muted">{{ project.description }}</p>
+<div class="mb-3">
+    <a href="{{ url_for('project_list') }}" class="btn btn-secondary btn-sm">&larr; Powrót do projektów</a>
+</div>
+
+<div class="row">
+    {% for step in steps %}
+    <div class="col-12 mb-3">
+        <div class="step-card p-3 {{ step.status }}">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span class="badge bg-secondary me-2">#{{ step.position+1 }}</span>
+                    <strong>{{ step.name }}</strong>
+                    <div class="small mt-1">
+                        <i class="far fa-clock"></i> {{ step.planned_hours }}h | 
+                        Priorytet: 
+                        {% if step.priority == 'natychmiast' %}
+                            <span class="badge bg-danger">Natychmiast</span>
+                        {% elif step.priority == 'pilny' %}
+                            <span class="badge bg-warning text-dark">Pilny</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Normalny</span>
+                        {% endif %}
+                        | Status: 
+                        <span class="badge 
+                            {% if step.status == 'todo' %}bg-secondary
+                            {% elif step.status == 'in_progress' %}bg-warning
+                            {% elif step.status == 'paused' %}bg-secondary
+                            {% else %}bg-success{% endif %}">
+                            {% if step.status == 'todo' %}Do zrobienia
+                            {% elif step.status == 'in_progress' %}W trakcie
+                            {% elif step.status == 'paused' %}Wstrzymane
+                            {% else %}Zrobione{% endif %}
+                        </span>
+                        {% if step.required_roles %} | Wymagane role: {{ step.required_roles }}{% endif %}
+                        {% if step.assigned_user %} | Wykonawca: {{ step.assigned_user.username }}{% endif %}
+                        {% if step.actual_hours and step.status == 'done' %} | ⏱️ Rzeczywisty czas: {{ step.actual_hours }} h{% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    {% if can_edit %}
+                    <a href="{{ url_for('edit_step', project_id=project.id, step_id=step.id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                    <a href="{{ url_for('delete_step', project_id=project.id, step_id=step.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Usunąć krok?')"><i class="fas fa-trash"></i></a>
+                    {% endif %}
+                    {% if step.status != 'done' %}
+                        {% if step.status == 'todo' %}
+                        <a href="{{ url_for('change_step_status', step_id=step.id, status='in_progress') }}" class="btn btn-sm btn-outline-warning">Rozpocznij</a>
+                        {% elif step.status == 'in_progress' %}
+                        <a href="{{ url_for('change_step_status', step_id=step.id, status='paused') }}" class="btn btn-sm btn-outline-secondary">⏸️ Wstrzymaj</a>
+                        <a href="{{ url_for('change_step_status', step_id=step.id, status='done') }}" class="btn btn-sm btn-outline-success">Zakończ</a>
+                        {% elif step.status == 'paused' %}
+                        <a href="{{ url_for('change_step_status', step_id=step.id, status='in_progress') }}" class="btn btn-sm btn-outline-primary">▶️ Wznów</a>
+                        <a href="{{ url_for('change_step_status', step_id=step.id, status='done') }}" class="btn btn-sm btn-outline-success">Zakończ</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% if step.description %}
+            <div class="mt-2 text-muted small">{{ step.description }}</div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12"><div class="alert alert-warning">Brak kroków w projekcie.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

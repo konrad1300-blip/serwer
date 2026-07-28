@@ -1,0 +1,28 @@
+<!-- templates/calendar.html -->
+{% extends "base.html" %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<h3><i class="fas fa-calendar-alt"></i> Kalendarz terminów i nieobecności</h3>
+<div id="calendar" class="mt-3"></div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pl',
+            events: {{ events|tojson|safe }},
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            }
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}

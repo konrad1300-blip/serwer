@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h3><i class="fas fa-history"></i> Dziennik zdarzeń systemowych</h3>
+<hr>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr><th>Data i czas</th><th>Użytkownik</th><th>Akcja</th><th>Szczegóły</th></tr>
+        </thead>
+        <tbody>
+            {% for log in logs.items %}
+            <tr>
+                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ log.username }}</td>
+                <td><span class="badge bg-secondary">{{ log.action }}</span></td>
+                <td>{{ log.details or '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<nav>
+    <ul class="pagination">
+        {% if logs.has_prev %}
+        <li class="page-item"><a class="page-link" href="?page={{ logs.prev_num }}">Poprzednia</a></li>
+        {% endif %}
+        {% for p in logs.iter_pages() %}
+            {% if p %}
+                <li class="page-item {% if p == logs.page %}active{% endif %}"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+        {% if logs.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ logs.next_num }}">Następna</a></li>
+        {% endif %}
+    </ul>
+</nav>
+<p class="text-muted small">Logi starsze niż 3 miesiące są automatycznie usuwane.</p>
+{% endblock %}

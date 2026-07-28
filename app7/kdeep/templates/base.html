@@ -1,0 +1,128 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIT-zen - Zarządzanie projektami</title>
+    <!-- Bootstrap 5 + Icons + FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- jQuery (dla uproszczenia AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #bcbcbd;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .card {
+            border-radius: 0.75rem;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+        }
+        .btn-sm {
+            border-radius: 0.5rem;
+        }
+        .step-card {
+            transition: 0.2s;
+            border-left: 5px solid #0d6efd;
+        }
+        .step-card.todo { border-left-color: #6c757d; background-color: #fff; }
+        .step-card.in_progress { border-left-color: #ffc107; background-color: #fffdf7; }
+        .step-card.done { border-left-color: #198754; background-color: #f8fff9; opacity: 0.85; }
+        .footer {
+            text-align: center;
+            background-color: #ececec;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg bg-white px-3 py-2">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+            <i class="fas fa-tasks me-2 text-primary"></i>KIT-zen
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Pulpit</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('project_list') }}"><i class="fas fa-project-diagram"></i> Projekty</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('calendar_view') }}"><i class="fas fa-calendar-alt"></i> Kalendarz</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('charts') }}"><i class="fas fa-chart-line"></i> Wykresy</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('view_logs') }}"><i class="fas fa-history"></i> Dziennik</a></li>
+                
+                {% if current_user.is_authenticated and (current_user.is_admin or current_user.has_role('technolog')) %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('sprawdzenie_produkcji') }}"><i class="fas fa-clipboard-check"></i> Sprawdzenie produkcji</a></li>
+                {% endif %}
+                
+                {% if current_user.is_admin %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_users') }}"><i class="fas fa-users-cog"></i> Zarządzanie użytkownikami</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('archive') }}"><i class="fas fa-archive"></i> Archiwum</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('list_project_templates') }}"><i class="fas fa-layer-group"></i> Szablony projektów</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('list_step_templates') }}"><i class="fas fa-cubes"></i> Szablony kroków</a></li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i> {{ current_user.username }}
+                        {% if current_user.is_admin %}<span class="badge bg-secondary ms-1">Admin</span>{% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Wyloguj</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<div class="footer">
+    KIT-zen &copy; 2025 - Zawsze będziesz wiedział co masz do zrobienia ;-)
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

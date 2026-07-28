@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between">
+    <h3><i class="fas fa-project-diagram"></i> Projekty (aktywne)</h3>
+    {% if current_user.is_admin %}<a href="{{ url_for('add_project') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nowy projekt</a>{% endif %}
+</div>
+<hr>
+
+<!-- Dodanie klasy g-4 zapewnia odstępy między wierszami i kolumnami -->
+<div class="row g-4">
+    {% for project in projects %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ project.name }}</h5>
+                <p class="card-text small">{{ project.description[:100] }}</p>
+                <p><i class="far fa-calendar-alt"></i> Utworzono: {{ project.created_at.strftime('%Y-%m-%d') }}
+                    {% if project.deadline %}<br><i class="fas fa-hourglass-end"></i> Termin: {{ project.deadline }}{% endif %}
+                </p>
+                <!-- Pasek postępu -->
+                {% set total_steps = project.steps|length %}
+                {% set done_steps = project.steps|selectattr('status', 'equalto', 'done')|list|length %}
+                {% if total_steps > 0 %}
+                    {% set percent = (done_steps / total_steps * 100)|round|int %}
+                    <div class="mt-2">
+                        <div class="d-flex justify-content-between small">
+                            <span>Postęp</span>
+                            <span>{{ done_steps }}/{{ total_steps }} ({{ percent }}%)</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ percent }}%;" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="mt-2 text-muted small">Brak kroków</div>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{{ url_for('project_steps', project_id=project.id) }}" class="btn btn-outline-primary btn-sm">Zobacz kroki</a>
+                    {% if current_user.is_admin and not project.is_archived %}
+                    <a href="{{ url_for('archive_project', project_id=project.id) }}" class="btn btn-outline-secondary btn-sm ms-2" onclick="return confirm('Przenieść do archiwum?')">Archiwizuj</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12"><div class="alert alert-info">Brak aktywnych projektów.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

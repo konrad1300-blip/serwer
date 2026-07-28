@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<style>
+.kanban-board {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+.kanban-column {
+    background: #f8f9fa;
+    border-radius: 0.75rem;
+    min-width: 300px;
+    width: 33%;
+    padding: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.kanban-column h4 {
+    text-align: center;
+    padding: 10px;
+    background: white;
+    border-radius: 0.5rem;
+    margin-bottom: 15px;
+}
+.kanban-items {
+    min-height: 400px;
+}
+.kanban-item {
+    background: white;
+    border-left: 5px solid #0d6efd;
+    border-radius: 0.5rem;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: grab;
+    transition: 0.1s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.kanban-item:active { cursor: grabbing; }
+.kanban-item.todo { border-left-color: #6c757d; }
+.kanban-item.in_progress { border-left-color: #ffc107; background-color: #fffcf0; }
+.kanban-item.done { border-left-color: #198754; background-color: #f0f9f0; opacity: 0.9; }
+.kanban-item h6 { margin: 0 0 5px; font-size: 1rem; }
+.kanban-item small { font-size: 0.7rem; color: #6c757d; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3><i class="fas fa-chalkboard"></i> Tablica Kanban</h3>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Powrót do pulpitu</a>
+</div>
+<div class="kanban-board">
+    <div class="kanban-column" data-status="todo">
+        <h4>📋 Do zrobienia</h4>
+        <div class="kanban-items" id="todo-items">
+            {% for task in tasks.todo %}
+            <div class="kanban-item todo" data-id="{{ task.id }}" data-status="todo">
+                <h6>{{ task.name }}</h6>
+                <small>{{ task.project.name }} | {{ task.planned_hours }}h</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="kanban-column" data-status="in_progress">
+        <h4>⚙️ W trakcie / Wstrzymane</h4>
+        <div class="kanban-items" id="in_progress-items">
+            {% for task in tasks.in_progress %}
+            <div class="kanban-item in_progress" data-id="{{ task.id }}" data-status="in_progress">
+                <h6>{{ task.name }}</h6>
+                <small>{{ task.project.name }} | {{ task.planned_hours }}h</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="kanban-column" data-status="done">
+        <h4>✅ Zrobione</h4>
+        <div class="kanban-items" id="done-items">
+            {% for task in tasks.done %}
+            <div class="kanban-item done" data-id="{{ task.id }}" data-status="done">
+                <h6>{{ task.name }}</h6>
+                <small>{{ task.project.name }} | {{ task.planned_hours }}h</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    document.querySelectorAll('.kanban-items').forEach(container => {
+        new Sortable(container, {
+            group: 'kanban',
+            animation: 150,
+            onEnd: function(evt) {
+                let newStatus = evt.to.closest('.kanban-column').dataset.status;
+                let stepId = evt.item.dataset.id;
+                fetch(`/step/change_status/${stepId}/${newStatus}`, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) location.reload();
+                        else alert('Błąd zmiany statusu');
+                    })
+                    .catch(err => alert('Błąd sieci'));
+            }
+        });
+    });
+</script>
+{% endblock %}

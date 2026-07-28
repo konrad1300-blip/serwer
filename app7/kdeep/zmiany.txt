@@ -1,0 +1,103 @@
+na stronie wykresy potrzebuje by jeden wykres był na szerokość 
+strony i byś dodał jeszcze wykres przepływu zadań oraz wykres 
+wąskich gardeł.
+chciałbym dodać dziennilk do którego może zajrzeć administrator
+gdzie wszystkie akcje zapisywane byłyby chronologicznie
+i przechowywane byłyby 3 miesiące a starsze usuwane
+
+chciałbym byś zastosował weasyprint do generowania dokumentów PDF
+urzytkownik może ściągnąć sobie kompletna listę zadań do wykonania 
+w trakcie i zrobionych w wybranym okresie czasowym, administrator 
+to samo ala również PDF zespołu
+
+Chciałbym dodać do aplikacji edytor szablonów projektów i edytor 
+szablonów kroków. Tak by zapiasne szablony mozna użyć w nowych 
+projektach a szablony kroków wybierać z listy rozwijanej 
+tak jak teraz wybiera zię szablony porojektów osadzinych w kodzie.
+na stronie projekty chciałbym by kafelek projektu podziadał 
+wskażnik ile kroków jest już zerealizowanych a ile jeszcze czeka 
+może to być pasek procentowy.
+
+chciałbym przerobić aplikacje tak by na pulpicie pojawiały się tylko 
+kroki przypisane do użytkownika plus takie które nie są przypisane 
+do nikogo. poza tym chcę by do kroków możnabyło dopisać priorytet
+w trzech stopniach: normalny; pilny; natychmiast.3 szablony osadzone
+w kodzie chciałbym umieścić w badzie danych przy jej inicjacji w taki
+sposób by były normalnymi szablonami z możliwością edycji jak wszystkie
+inne szablony. 
+
+rezygnujemy całkowicie z systemu powiaddomień dzwoneczkiem. Zmiana logiki
+działania krok wykonany pozostaje na liście na pulpicie dopuki projekt
+nie zostanie przeniesiony do archiwum. jednocześnie zmienia kolor
+na zielony i przesunięty jest na konniec listy (dół strony). Na 
+pulpicie liczniki do zrobienia, w trakcie i zrobione nie zliczaja projektów
+przeniesionych do archiwum. Czy można w raporcie pdf dodać kolumnę: 
+realny czas pracy, która zawieraćbędzie czas od kliknięcia w trakcie do
+kliknięcia zrobione. w raporcie pdf zawijaj tekst w kolumnie role, bo teraz 
+raport wchodzi na margines.
+
+-----------------------------------------------GEMINI analiza
+
+Problem: Używasz datetime.utcnow, które od Pythona 3.12 jest oznaczone jako 
+deprecated (przestarzałe), ponieważ zwraca obiekt naiwny (bez strefy czasowej), 
+co może powodować problemy przy przesunięciach czasu (np. w Polsce letni/zimowy).
+
+Rozwiązanie: Zastąp je świadomym strefy czasowej datetime.now(timezone.utc) 
+lub ustaw domyślną strefę dla Polski (Europe/Warsaw).
+
+Problem: W dashboardzie oraz na listach projektów wykonujesz pętle, które dla 
+każdego kroku dociągają z bazy powiązany projekt lub użytkownika 
+(step.project.name, step.assigned_user). Generuje to dziesiątki osobnych 
+zapytań do SQLite.
+
+Rozwiązanie: Użyj joinedload, aby pobrać powiązane dane w jednym zapytaniu SQL:
+
+
+Problem: W funkcji delete_step ręcznie przeliczasz pozycje (position) pozostałych 
+kroków w pętli i robisz db.session.commit(). Jeśli coś pójdzie nie tak w środku 
+pętli, baza zostanie w stanie niespójnym.
+
+
+Rozbudowa rejestratora czasu (Real Time Tracking)
+
+Obecna implementacja liczy czas od kliknięcia in_progress do done. 
+W rzeczywistości pracownik rzadko robi zadanie bez przerw (idzie na spotkanie, 
+kończy zmianę, zaczyna inne zadanie).
+
+Pomysł: Wprowadzenie statusu paused (Wstrzymane).
+
+Jak to zrobić? Stworzyć nową tabelę 
+TimeLog(id, step_id, user_id, start_time, end_time). Kliknięcie "Rozpocznij" 
+tworzy nowy wpis. Kliknięcie "Wstrzymaj" lub "Zakończ" uzupełnia end_time. 
+Suma tych odcinków da faktyczny czas pracy nad krokiem.
+
+Kanban Board jako alternatywny widok Dashboardu
+
+Skoro zadania mają naturalne statusy (todo -> in_progress -> done), 
+idealnym rozwiązaniem wizualnym dla zespołu byłaby tablica Kanban 
+(trzy kolumny), gdzie kafelki zadań można przeciągać między kolumnami. 
+Zmiana kolumny automatycznie wywoływałaby 
+Twój URL /step/change_status/<id>/<status>.
+
+Porównanie czasu planowanego z rzeczywistym (Analiza wąskich gardeł)
+
+Masz już w bazie planned_hours oraz actual_hours. Na stronie z wykresami 
+(/charts) warto dodać wykres słupkowy (tzw. grouped bar chart), który pokaże 
+dla ukończonych projektów zestawienie: Czas Planowany vs Czas Rzeczywisty. 
+Pozwoli to technologom lepiej szacować czas w przyszłych szablonach projektów.
+Rozwiązanie: Zapakuj operacje w blok try/except z db.session.rollback() 
+w razie błędu.
+
+
+W katalogu jest plik polaczenie_erpxl.py pozwala on połaczyć się z bazą 
+danych. pobiera dane do zmiennej db(pandas). Chciałbym dołacyć ten plik do 
+pliku app dane posortować w taki sposób by w  postaci tabeli wyświetlały 
+się tylko aktualne dwa tygodnie planu produkcyjnego do przodu. potrzebuje
+dodatkowej strony "Sprawdzenie produkcji" dostępnej dla technologów i 
+administratorów. na stronie przycisk do nawiązania 
+połaczenia i uaktualnienie danych, widok tabeli z dodatkową koluną gdzie
+użytkownik może odznaczyć ptaszkiem "sprawdzono". Docelowo ma to być 
+check lista dla działu sprawdzająca czy wszystkie produkty idące na 
+produkcję są skończone i prawidłowe.
+
+Ukryj kolumnę PZL_ID ze strony i dodaj filtrowanie na innych kolumnach.

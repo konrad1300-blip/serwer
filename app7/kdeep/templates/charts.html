@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h3><i class="fas fa-chart-pie"></i> Analizy i wykresy</h3>
+
+<!-- Wykres przepływu zadań – pełna szerokość -->
+<div class="card mb-4">
+    <div class="card-header">📈 Przepływ zadań (ukończone w ostatnich 30 dniach)</div>
+    <div class="card-body text-center">
+        <img src="data:image/png;base64,{{ flow_chart }}" class="img-fluid" style="max-width: 100%;">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">⚙️ Obciążenie pracowników</div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ workload_chart }}" class="img-fluid">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">🎯 Wąskie gardła</div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ bottleneck_chart }}" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">📊 Zadania oczekujące wg roli</div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ roles_chart }}" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Nowy wykres: Planowane vs Rzeczywiste -->
+<div class="card mt-4">
+    <div class="card-header">📊 Planowane vs Rzeczywiste (ukończone zadania)</div>
+    <div class="card-body text-center">
+        <img src="data:image/png;base64,{{ plan_vs_actual_chart }}" class="img-fluid">
+    </div>
+</div>
+{% endblock %}

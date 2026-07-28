@@ -1,0 +1,135 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="fas fa-tachometer-alt me-2"></i>Pulpit</h3>
+    <div>
+        <a href="{{ url_for('kanban') }}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-chalkboard"></i> Widok Kanban
+        </a>
+        <span class="badge bg-primary">Witaj, {{ user.username }}</span>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Moje zadania -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">📋 Moje zadania (aktywne i zakończone)</div>
+            <div class="card-body">
+                {% if my_tasks %}
+                    {% for task in my_tasks %}
+                    <div class="step-card mb-3 p-3 {{ task.status }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold">{{ task.name }}</h6>
+                                <p class="text-muted small mb-1">
+                                    Projekt: {{ task.project.name }} | 
+                                    Czas: {{ task.planned_hours }}h | 
+                                    Priorytet: 
+                                    {% if task.priority == 'natychmiast' %}
+                                        <span class="badge bg-danger">Natychmiast</span>
+                                    {% elif task.priority == 'pilny' %}
+                                        <span class="badge bg-warning text-dark">Pilny</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Normalny</span>
+                                    {% endif %}
+                                    | Status: 
+                                    <span class="badge 
+                                        {% if task.status == 'todo' %}bg-secondary
+                                        {% elif task.status == 'in_progress' %}bg-warning
+                                        {% elif task.status == 'paused' %}bg-secondary
+                                        {% else %}bg-success{% endif %}">
+                                        {% if task.status == 'todo' %}Do zrobienia
+                                        {% elif task.status == 'in_progress' %}W trakcie
+                                        {% elif task.status == 'paused' %}Wstrzymane
+                                        {% else %}Zrobione{% endif %}
+                                    </span>
+                                </p>
+                                {% if task.required_roles %}<span class="badge bg-info">Rola: {{ task.required_roles }}</span>{% endif %}
+                                {% if task.actual_hours and task.status == 'done' %}
+                                    <span class="badge bg-secondary">⏱️ Rzeczywisty czas: {{ task.actual_hours }} h</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if task.status != 'done' %}
+                                    {% if task.status == 'todo' %}
+                                    <a href="{{ url_for('change_step_status', step_id=task.id, status='in_progress') }}" class="btn btn-sm btn-outline-warning" title="Rozpocznij">🚀</a>
+                                    {% elif task.status == 'in_progress' %}
+                                    <a href="{{ url_for('change_step_status', step_id=task.id, status='paused') }}" class="btn btn-sm btn-outline-secondary" title="Wstrzymaj">⏸️</a>
+                                    <a href="{{ url_for('change_step_status', step_id=task.id, status='done') }}" class="btn btn-sm btn-outline-success" title="Zakończ">✓</a>
+                                    {% elif task.status == 'paused' %}
+                                    <a href="{{ url_for('change_step_status', step_id=task.id, status='in_progress') }}" class="btn btn-sm btn-outline-primary" title="Wznów">▶️</a>
+                                    <a href="{{ url_for('change_step_status', step_id=task.id, status='done') }}" class="btn btn-sm btn-outline-success" title="Zakończ">✓</a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if task.description %}<small>{{ task.description }}</small>{% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-light">Brak zadań przypisanych lub nieprzypisanych w aktywnych projektach.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Statystyki i wykresy -->
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">📊 Statystyki ogólne (tylko aktywne projekty)</div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col"><div class="display-6">{{ steps_todo }}</div><small>Do zrobienia</small></div>
+                    <div class="col"><div class="display-6">{{ steps_in_progress }}</div><small>W trakcie / Wstrzymane</small></div>
+                    <div class="col"><div class="display-6">{{ steps_done }}</div><small>Zrobione</small></div>
+                </div>
+                <hr>
+                <img src="data:image/png;base64,{{ workload_chart }}" class="img-fluid rounded" alt="Obciążenie">
+                <img src="data:image/png;base64,{{ roles_chart }}" class="img-fluid rounded mt-3" alt="Zadania wg ról">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SEKCJA GENEROWANIA RAPORTÓW PDF -->
+<div class="card mt-4">
+    <div class="card-header">📄 Generuj raport PDF</div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('my_tasks_pdf') }}" target="_blank">
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Data początkowa</label>
+                    <input type="date" name="start_date" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Data końcowa</label>
+                    <input type="date" name="end_date" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-file-pdf"></i> Pobierz PDF (moje zadania)</button>
+                </div>
+            </div>
+        </form>
+        {% if current_user.is_admin %}
+        <hr>
+        <form method="GET" action="{{ url_for('team_tasks_pdf') }}" target="_blank">
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Data początkowa</label>
+                    <input type="date" name="start_date" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Data końcowa</label>
+                    <input type="date" name="end_date" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-users"></i> Pobierz PDF (raport zespołu)</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+        <p class="text-muted small mt-3">Raport zawiera zadania filtrowane według daty ostatniej zmiany statusu (ukończenia, rozpoczęcia lub utworzenia). Możesz wybrać dowolny zakres.</p>
+    </div>
+</div>
+{% endblock %}

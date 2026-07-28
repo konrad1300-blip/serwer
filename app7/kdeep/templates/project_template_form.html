@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">{{ title }}</div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">{{ form.name.label }} {{ form.name(class="form-control") }}</div>
+                    <div class="mb-3">{{ form.description.label }} {{ form.description(class="form-control", rows=3) }}</div>
+                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                    <a href="{{ url_for('list_project_templates') }}" class="btn btn-secondary">Anuluj</a>
+                </form>
+                {% if template %}
+                <hr>
+                <h5>Kroki w szablonie</h5>
+                <ul class="list-group mb-3">
+                    {% for step in template.steps %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ step.name }} ({{ step.planned_hours }}h, role: {{ step.required_roles or 'brak' }})
+                        <a href="{{ url_for('delete_step_from_template', step_id=step.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Usunąć krok?')">Usuń</a>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">Brak kroków.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('add_step_to_template', template_id=template.id) }}" class="btn btn-sm btn-success">+ Dodaj krok</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

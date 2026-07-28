@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between">
+    <h3><i class="fas fa-layer-group"></i> Szablony projektów</h3>
+    <a href="{{ url_for('add_project_template') }}" class="btn btn-primary">+ Nowy szablon</a>
+</div>
+<hr>
+<table class="table table-hover">
+    <thead>
+        <tr><th>Nazwa</th><th>Opis</th><th>Liczba kroków</th><th>Akcje</th></tr>
+    </thead>
+    <tbody>
+    {% for tpl in templates %}
+    <tr>
+        <td>{{ tpl.name }}</td>
+        <td>{{ tpl.description or '' }}</td>
+        <td>{{ tpl.steps|length }}</td>
+        <td>
+            <a href="{{ url_for('edit_project_template', template_id=tpl.id) }}" class="btn btn-sm btn-outline-primary">Edytuj</a>
+            <a href="{{ url_for('delete_project_template', template_id=tpl.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Usunąć szablon?')">Usuń</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

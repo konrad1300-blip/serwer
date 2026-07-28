@@ -1,0 +1,319 @@
+/* style.css - KIT-zen: nowoczesny, przejrzysty interfejs z szarym tłem i akcentami */
+
+/* ---------- GLOBALNE ---------- */
+body {
+    background-color: #909091;  /* lekki odcień szarości */
+    font-family: 'Inter', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    color: #1e2a3e;
+    line-height: 1.5;
+}
+
+/* kontenery */
+.container, .container-fluid {
+    max-width: 1400px;
+}
+
+/* karty – główny element wizualny */
+.card {
+    border: none;
+    border-radius: 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #edf2f7;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* ---------- STEP CARD (krok zadania) ---------- */
+.step-card {
+    border-left: 5px solid #0d6efd;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+}
+
+/* kolory w zależności od statusu (klasy dodawane dynamicznie) */
+.step-card.todo {
+    border-left-color: #6c757d;
+    background-color: #ffffff;
+}
+.step-card.in_progress {
+    border-left-color: #ffc107;
+    background-color: #fffcf0;
+}
+.step-card.done {
+    border-left-color: #198754;
+    background-color: #f0f9f0;
+    opacity: 0.9;
+}
+
+/* pasek postępu czasu (np. reprezentacja wizualna planowanych godzin) */
+.time-progress {
+    background-color: #e9ecef;
+    border-radius: 1rem;
+    height: 0.5rem;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+.time-progress-bar {
+    background-color: #0d6efd;
+    height: 100%;
+    width: 0%;
+    border-radius: 1rem;
+}
+
+/* wskaźnik dla blokowanego kroku (może być dodany) */
+.step-card.blocked {
+    opacity: 0.6;
+    filter: grayscale(0.1);
+    border-left-color: #adb5bd;
+}
+
+/* ---------- NAWIGACJA (navbar) ---------- */
+.navbar {
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    padding: 0.75rem 1rem;
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+.nav-link {
+    font-weight: 500;
+    color: #2c3e50 !important;
+    margin: 0 0.2rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+}
+.nav-link:hover {
+    background-color: #f1f5f9;
+}
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-radius: 0.75rem;
+}
+
+/* ---------- PRZYCISKI ---------- */
+.btn {
+    border-radius: 0.6rem;
+    padding: 0.4rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.btn-primary {
+    background-color: #1e6fdf;
+    border-color: #1e6fdf;
+}
+.btn-primary:hover {
+    background-color: #0a58ca;
+    transform: translateY(-1px);
+}
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+}
+.btn-sm {
+    padding: 0.25rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+/* ---------- POWIADOMIENIA (toasty / dymki) ---------- */
+.toast-notification {
+    background-color: white;
+    border-radius: 0.75rem;
+    border-left: 4px solid #1e6fdf;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    font-size: 0.9rem;
+    max-width: 320px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.toast-notification:hover {
+    opacity: 0.95;
+}
+.bell-icon {
+    position: relative;
+}
+.badge-notify {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.45rem;
+    border-radius: 50%;
+}
+
+/* ---------- TABELE ---------- */
+.table {
+    background-color: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.table thead th {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 600;
+}
+.table-hover tbody tr:hover {
+    background-color: #fafcff;
+}
+
+/* ---------- FORMULARZE ---------- */
+.form-control, .form-select {
+    border-radius: 0.6rem;
+    border: 1px solid #cbd5e1;
+    padding: 0.5rem 0.75rem;
+    transition: 0.2s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #1e6fdf;
+    box-shadow: 0 0 0 0.2rem rgba(30,111,223,0.15);
+}
+label {
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+/* ---------- KALENDARZ (FullCalendar) ---------- */
+#calendar {
+    background: white;
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+.fc {
+    font-family: inherit;
+}
+.fc-toolbar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* ---------- STOPKA ---------- */
+.footer {
+    font-size: 0.8rem;
+    color: #6c757d;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 2.5rem;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+/* ---------- RESPONSYWNOŚĆ ---------- */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    .step-card {
+        padding: 0.75rem;
+    }
+    .btn-sm {
+        padding: 0.2rem 0.6rem;
+    }
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* ---------- DODATKI: wizualizacja "prostokąta długości czasu" ---------- */
+/* klasa dla elementu reprezentującego czas (kwadrat z szerokością proporcjonalną do godzin) */
+.time-rectangle {
+    background-color: #0d6efd20;
+    border: 1px solid #0d6efd40;
+    border-radius: 0.5rem;
+    height: 2rem;
+    line-height: 2rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #0d6efd;
+    min-width: 40px;
+    width: calc(100% * min(1, (var(--hours, 1) / 40))); /* przykładowa skala do 40h */
+    max-width: 100%;
+    transition: width 0.2s;
+}
+/* w przypadku gdy chcemy użyć w gridzie */
+.hours-bar {
+    background-color: #e2e8f0;
+    border-radius: 0.5rem;
+    height: 0.7rem;
+    overflow: hidden;
+}
+.hours-bar-fill {
+    background-color: #1e6fdf;
+    height: 100%;
+    border-radius: 0.5rem;
+    width: 0%;
+}
+
+/* ---------- GRAFIKI I WYKRESY (matplotlib jako img) ---------- */
+img[src*="data:image/png;base64"] {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    padding: 0.5rem;
+}
+.step-card.done {
+    border-left-color: #198754;
+    background-color: #e8f3e8;  /* jaśniejszy zielony */
+    opacity: 0.95;
+}
+/* Kanban */
+.kanban-board {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+.kanban-column {
+    background: #f8f9fa;
+    border-radius: 0.75rem;
+    min-width: 300px;
+    padding: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.kanban-column h4 {
+    text-align: center;
+    padding: 10px;
+    background: white;
+    border-radius: 0.5rem;
+    margin-bottom: 15px;
+}
+.kanban-items {
+    min-height: 400px;
+}
+.kanban-item {
+    background: white;
+    border-left: 5px solid #0d6efd;
+    border-radius: 0.5rem;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: grab;
+    transition: 0.1s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.kanban-item:active { cursor: grabbing; }
+.kanban-item.todo { border-left-color: #6c757d; }
+.kanban-item.in_progress { border-left-color: #ffc107; background-color: #fffcf0; }
+.kanban-item.done { border-left-color: #198754; background-color: #f0f9f0; opacity: 0.9; }
