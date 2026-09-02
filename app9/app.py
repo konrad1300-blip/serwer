@@ -53,19 +53,19 @@ def index():
 
     form_data = {
         'ilosc_szt': '', 'opis': '', 'material_kod': '', 'dlugosc': '',
-        'strona': 'P', 'kolor_pisaka': 'Cz', 'maszyna': 'Br', 'kod_produktu': ''
+        'strona': 'P', 'kolor_pisaka': 'Cz', 'maszyna': 'Zu', 'kod_produktu': ''
     }
 
     if request.method == 'POST':
         ilosc_szt = request.form.get('ilosc_szt', '').strip()
-        opis = request.form.get('opis', '').strip()
+        opis = request.form.get('opis', '').strip()[:10]  # Max 10 znaków
         material_kod = request.form.get('material_kod', '').strip().upper()
         dlugosc = request.form.get('dlugosc', '').strip()
         kod_produktu = request.form.get('kod_produktu', '').strip().upper()
 
         strona = request.form.get('strona', 'P')
         kolor_pisaka = request.form.get('kolor_pisaka', 'Cz')
-        maszyna = request.form.get('maszyna', 'Br')
+        maszyna = request.form.get('maszyna', 'Zu')
 
         form_data = {
             'ilosc_szt': ilosc_szt, 'opis': opis, 'material_kod': material_kod,
@@ -73,20 +73,22 @@ def index():
             'maszyna': maszyna, 'kod_produktu': kod_produktu
         }
 
-        # Weryfikacja materiału w pliku CSV
-        materiały_dict = load_materials_dict()
-        if material_kod in materiały_dict:
-            material_nazwa_wyswietlana = materiały_dict[material_kod]
-            
-            opis_clean = remove_polish_chars(opis)
-            material_kod_clean = remove_polish_chars(material_kod)
-
-            # Schemat: ilosc_szt + "szt_" + strona + "_" + kolor_pisaka + "_" + material_kod + "_" + opis + "_" + maszyna + "_" + dlugosc + "mb"
-            wygenerowana_nazwa = f"{ilosc_szt}szt_{strona}_{kolor_pisaka}_{material_kod_clean}_{opis_clean}_{maszyna}_{dlugosc}mb"
-            if kod_produktu:
-                wygenerowana_nazwa += f"_{kod_produktu}"
+        # Walidacja pól wymaganych (wszystkie oprócz opisu)
+        if not (ilosc_szt and material_kod and strona and kolor_pisaka and dlugosc and maszyna and kod_produktu):
+            error_message = "Proszę uzupełnić wszystkie wymagane pola."
         else:
-            error_message = "Nie znaleziono takiego materiału"
+            # Weryfikacja materiału w pliku CSV
+            materiały_dict = load_materials_dict()
+            if material_kod in materiały_dict:
+                material_nazwa_wyswietlana = materiały_dict[material_kod]
+                
+                opis_clean = remove_polish_chars(opis)
+                material_kod_clean = remove_polish_chars(material_kod)
+
+                # Schemat: ilosc_szt + "szt_" + strona + "_" + kolor_pisaka + "_" + material_kod + "_" + opis + "_" + maszyna + "_" + dlugosc + "mb" + "_" + kod_produktu
+                wygenerowana_nazwa = f"{ilosc_szt}szt_{strona}_{kolor_pisaka}_{material_kod_clean}_{opis_clean}_{maszyna}_{dlugosc}mb_{kod_produktu}"
+            else:
+                error_message = "Nie znaleziono takiego materiału"
 
     return render_template(
         'index.html',

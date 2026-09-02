@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GNPK v0.4 - Generator Nazw Plików Kroju</title>
+    <title>GNPK v0.5 - Generator Nazw Plików Kroju</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .top-bar {
@@ -87,7 +87,7 @@
         <a href="/" class="nav-btn">Strona główna</a>
 
         <div class="top-bar">
-            <h1>GNPK v0.4 Web - Generator Nazw Plików Kroju</h1>
+            <h1>GNPK v0.5 Web - Generator Nazw Plików Kroju</h1>
             <a href="{{ url_for('pomoc') }}" class="server-home-btn" style="text-decoration: none; font-size: 0.9rem; color: #4a4a4a;">🛈 Instrukcja</a>
         </div>
 
@@ -127,46 +127,46 @@
                 <div>
                     <label>Strona / Orientacja:</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="strona" value="L" {% if form.strona == 'L' %}checked{% endif %}> Lewa (L)</label>
-                        <label><input type="radio" name="strona" value="P" {% if form.strona == 'P' %}checked{% endif %}> Prawa (P)</label>
-                        <label><input type="radio" name="strona" value="O" {% if form.strona == 'O' %}checked{% endif %}> Obie (O)</label>
+                        <label><input type="radio" name="strona" value="L" {% if form.strona == 'L' %}checked{% endif %} required> Lewa (L)</label>
+                        <label><input type="radio" name="strona" value="P" {% if form.strona == 'P' or not form.strona %}checked{% endif %} required> Prawa (P)</label>
                     </div>
                 </div>
                 <div>
                     <label>Kolor pisaka:</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="kolor_pisaka" value="Cz" {% if form.kolor_pisaka == 'Cz' %}checked{% endif %}> Czarny (Cz)</label>
-                        <label><input type="radio" name="kolor_pisaka" value="S" {% if form.kolor_pisaka == 'S' %}checked{% endif %}> Srebrny (S)</label>
-                        <label><input type="radio" name="kolor_pisaka" value="N" {% if form.kolor_pisaka == 'N' %}checked{% endif %}> Niebieski (N)</label>
-                        <label><input type="radio" name="kolor_pisaka" value="Z" {% if form.kolor_pisaka == 'Z' %}checked{% endif %}> Zielony (Z)</label>
+                        <label><input type="radio" name="kolor_pisaka" value="Cz" {% if form.kolor_pisaka == 'Cz' or not form.kolor_pisaka %}checked{% endif %} required> Czarny (Cz)</label>
+                        <label><input type="radio" name="kolor_pisaka" value="S" {% if form.kolor_pisaka == 'S' %}checked{% endif %} required> Srebrny (S)</label>
+                        <label><input type="radio" name="kolor_pisaka" value="N" {% if form.kolor_pisaka == 'N' %}checked{% endif %} required> Niebieski (N)</label>
+                        <label><input type="radio" name="kolor_pisaka" value="Z" {% if form.kolor_pisaka == 'Z' %}checked{% endif %} required> Zielony (Z)</label>
                     </div>
                 </div>
             </div>
 
             <div class="form-group-row">
                 <div>
-                    <label for="opis">Opis elementu:</label>
-                    <input type="text" id="opis" name="opis" value="{{ form.opis }}" placeholder="np. Przod_kurtki">
+                    <label for="opis">Opis elementu (opcjonalnie, max 10 zn.):</label>
+                    <input type="text" id="opis" name="opis" value="{{ form.opis }}" placeholder="np. Przod" maxlength="10">
                 </div>
                 <div>
                     <label for="dlugosc">Długość układu (mb):</label>
-                    <input type="text" id="dlugosc" name="dlugosc" value="{{ form.dlugosc }}" placeholder="np. 4.5">
+                    <input type="text" id="dlugosc" name="dlugosc" value="{{ form.dlugosc }}" required placeholder="np. 4.5">
                 </div>
             </div>
 
             <div class="form-group-row">
                 <div>
                     <label>Maszyna CNC:</label>
-                    <select name="maszyna" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; margin-top: 5px;">
-                        <option value="Zu" {% if form.maszyna == 'Zu' %}selected{% endif %}>Zund (Zu)</option>
-                        <option value="Jw" {% if form.maszyna == 'Jw' %}selected{% endif %}>Jigwei (Jw)</option>
+                    <select name="maszyna" required style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; margin-top: 5px;">
+                        <option value="Zu" {% if form.maszyna == 'Zu' or not form.maszyna %}selected{% endif %}>Zund (Zu)</option>
+                        <option value="Ji" {% if form.maszyna == 'Ji' %}selected{% endif %}>Jigwei (Ji)</option>
                         <option value="Lc" {% if form.maszyna == 'Lc' %}selected{% endif %}>Lectra (Lc)</option>
+                        <option value="ZuJi" {% if form.maszyna == 'ZuJi' %}selected{% endif %}>Zund lub Jigwei (ZuJi)</option>
                         <option value="Br" {% if form.maszyna == 'Br' %}selected{% endif %}>Bez różnicy (Br)</option>
                     </select>
                 </div>
                 <div>
                     <label for="kod_produktu">Kod produktu:</label>
-                    <input type="text" id="kod_produktu" name="kod_produktu" value="{{ form.kod_produktu }}" placeholder="001-0001-001" maxlength="12" oninput="maskKodProduktu(this)">
+                    <input type="text" id="kod_produktu" name="kod_produktu" value="{{ form.kod_produktu }}" required placeholder="001-0001-001" maxlength="12" oninput="maskKodProduktu(this)">
                 </div>
             </div>
 
@@ -230,11 +230,9 @@
 
         function maskMaterialKod(el) {
             var val = el.value.toUpperCase();
-            // Jeśli użytkownik wpisze cyfrę na początku, automatycznie dodaj 'M'
             if (/^[0-9]/.test(val)) {
                 val = 'M' + val;
             }
-            // Zostawiamy 'M' na początku oraz cyfry
             var raw = val.replace(/[^M0-9]/g, '');
             if (raw.startsWith('M')) {
                 var digits = raw.slice(1).replace(/[^0-9]/g, '').slice(0, 7);
