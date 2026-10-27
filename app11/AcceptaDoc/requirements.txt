@@ -1,0 +1,26 @@
+# ── Zatwierdzenia / AcceptaDoc – zależności produkcyjne ────────
+# Python >= 3.13
+# Instalacja: pip install -r requirements.txt
+
+# ── Framework web ─────────────────────────────────────────────────
+Flask>=3.1,<3.2
+
+# ── WSGI / utils (używane jawnie w app.py) ────────────────────────
+# secure_filename, generate_password_hash, check_password_hash
+Werkzeug>=3.1,<3.2
+
+# ── Generowanie PDF (karta akceptacji) ────────────────────────────
+reportlab>=4.2,<5.0
+
+# ── Produkcyjny serwer WSGI ───────────────────────────────────────
+# Czysto-pythonowy, wielowątkowy serwer dla aplikacji Flask.
+# Uruchamiany przez run_prod.py. W dev nieużywany.
+waitress>=3.0,<4.0
+
+# ── Strefy czasowe (zoneinfo) ─────────────────────────────────────
+# Wbudowany moduł zoneinfo czyta dane TZ z systemu operacyjnego.
+# Linux: dane są w /usr/share/zoneinfo – pakiet nie jest potrzebny,
+#        ale nie szkodzi (zoneinfo preferuje systemowe, gdy są).
+# Windows: system NIE MA danych TZ – bez tego pakietu aplikacja
+#          wywala się przy imporcie pdf_report.py.
+tzdata>=2024.1

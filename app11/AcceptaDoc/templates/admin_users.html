@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Użytkownicy{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">👥 Zarządzanie użytkownikami</h1>
+    <p class="page-subtitle">{{ users|length }} kont</p>
+  </div>
+  <a href="{{ url_for('admin_user_new') }}" class="btn btn-primary">+ Nowy użytkownik</a>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Użytkownik</th>
+        <th>Imię i nazwisko</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Akcje</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td><code>{{ u.username }}</code></td>
+        <td>{{ u.full_name }}</td>
+        <td>
+          {% for r in u.roles %}
+          <span class="role-chip {% if r == 'Administrator' %}role-chip--admin{% endif %}">{{ r }}</span>
+          {% endfor %}
+        </td>
+        <td>
+          <span class="status-badge {% if u.is_active %}status-aktywny{% else %}status-nieaktywny{% endif %}">
+            {% if u.is_active %}Aktywny{% else %}Nieaktywny{% endif %}
+          </span>
+        </td>
+        <td class="actions-cell">
+          {% if u.id != session.user_id %}
+          <form method="POST" action="{{ url_for('admin_user_toggle', user_id=u.id) }}" class="inline-form">
+            <button type="submit" class="btn btn-sm btn-outline">
+              {% if u.is_active %}Dezaktywuj{% else %}Aktywuj{% endif %}
+            </button>
+          </form>
+          <button class="btn btn-sm btn-outline"
+                  data-reset-url="{{ url_for('admin_reset_password', user_id=u.id) }}"
+                  data-user-name="{{ u.full_name }}"
+                  onclick="showResetModal(this)">
+            🔑 Reset hasła
+          </button>
+          <button class="btn btn-sm btn-danger"
+                  data-delete-url="{{ url_for('admin_user_delete', user_id=u.id) }}"
+                  data-username="{{ u.username }}"
+                  data-fullname="{{ u.full_name }}"
+                  onclick="showDeleteUserModal(this)">
+            🗑 Usuń
+          </button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Reset password modal -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Reset hasła — <span id="resetUserName"></span></h3>
+      <button class="modal-close" onclick="hideModal('reset-modal')">×</button>
+    </div>
+    <form method="POST" id="resetForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label required">Nowe hasło</label>
+          <input type="password" name="new_password" class="form-control" minlength="6" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="hideModal('reset-modal')">Anuluj</button>
+        <button type="submit" class="btn btn-danger">Zmień hasło</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete user modal -->
+<div class="modal-overlay" id="delete-user-modal">
+  <div class="modal modal--danger">
+    <div class="modal-header">
+      <h3>🗑 Usuń użytkownika</h3>
+      <button class="modal-close" onclick="hideModal('delete-user-modal')">×</button>
+    </div>
+    <form method="POST" id="deleteUserForm">
+      <div class="modal-body">
+        <div class="delete-warning-box">
+          <strong>Użytkownik: <span id="deleteUserName"></span></strong>
+          <ul>
+            <li>Jeśli ma historię akceptacji — zostanie <strong>zanonimizowany</strong> (dane osobowe zastąpione, historia zachowana)</li>
+            <li>Jeśli nie ma historii — zostanie <strong>trwale usunięty</strong></li>
+            <li>Konto zostanie zablokowane do logowania</li>
+          </ul>
+          <p>Operacji nie można cofnąć.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Aby potwierdzić, wpisz nazwę użytkownika</label>
+          <input type="text" name="confirm_username" id="confirmUsername"
+                 class="form-control font-mono" autocomplete="off" required>
+          <p class="form-hint">Wpisz dokładnie: <code id="confirmUsernameHint"></code></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="hideModal('delete-user-modal')">Anuluj</button>
+        <button type="submit" class="btn btn-danger" id="deleteUserBtn" disabled>Usuń użytkownika</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showResetModal(btn) {
+  document.getElementById('resetUserName').textContent = btn.dataset.userName;
+  document.getElementById('resetForm').action = btn.dataset.resetUrl;
+  showModal('reset-modal');
+}
+
+function showDeleteUserModal(btn) {
+  var username = btn.dataset.username;
+  var fullName = btn.dataset.fullname;
+  document.getElementById('deleteUserName').textContent = username + ' (' + fullName + ')';
+  document.getElementById('confirmUsernameHint').textContent = username;
+  document.getElementById('deleteUserForm').action = btn.dataset.deleteUrl;
+  var input = document.getElementById('confirmUsername');
+  var submit = document.getElementById('deleteUserBtn');
+  input.value = '';
+  submit.disabled = true;
+  input.oninput = function () {
+    submit.disabled = (input.value.trim() !== username);
+  };
+  showModal('delete-user-modal');
+}
+</script>
+{% endblock %}

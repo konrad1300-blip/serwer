@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('products') }}">Produkty</a>
+      <span>›</span>
+      <span>{{ title }}</span>
+    </div>
+    <h1 class="page-title">{{ title }}</h1>
+  </div>
+</div>
+
+<div class="card form-card">
+  <form method="POST" class="form">
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label required" for="number">Numer produktu</label>
+        <input type="text" id="number" name="number" class="form-control font-mono"
+               placeholder="063-1026-001" pattern="\d{3}-\d{4}-\d{3}" required
+               title="Format: XXX-XXXX-XXX (np. 063-1026-001)">
+        <p class="form-hint">Format: <code>KKK-RRMM-SSS</code> (kod klienta – rok/miesiąc – numer)</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="order_number">Numer zamówienia</label>
+        <input type="text" id="order_number" name="order_number" class="form-control" placeholder="np. ZAM-2026-123">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="name">Nazwa produktu</label>
+      <input type="text" id="name" name="name" class="form-control" placeholder="Opcjonalna nazwa lub opis skrótowy">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="description">Opis</label>
+      <textarea id="description" name="description" class="form-control" rows="3"
+                placeholder="Dodatkowe informacje o produkcie…"></textarea>
+    </div>
+    <div class="form-actions">
+      <a href="{{ url_for('products') }}" class="btn btn-outline">Anuluj</a>
+      <button type="submit" class="btn btn-primary">Utwórz produkt →</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

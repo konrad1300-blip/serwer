@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Akceptacja {{ product.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('products') }}">Produkty</a> ›
+      <a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.name }}</a> ›
+      <span>Akceptacja</span>
+    </div>
+    <h1 class="page-title">Akceptacja dokumentacji</h1>
+    <p class="page-subtitle">
+      Rola: <strong>{{ user_role }}</strong>
+      {% if as_admin_for and as_admin_for != user_role %}
+        <span class="text-muted">(Administrator za: {{ as_admin_for }})</span>
+      {% endif %}
+      {% if stage %} · Etap {{ stage }}{% endif %}
+      · Wersja
+      <span class="version-tag">v{{ '%03d'|format(dv.version_num) }}</span>
+    </p>
+  </div>
+</div>
+
+<div class="card form-card">
+  <div class="file-row" style="margin-bottom:16px;padding:0">
+    <span class="file-icon">PDF</span>
+    <div class="file-meta">
+      <a href="{{ url_for('download_version', dv_id=dv.id) }}" class="file-name">{{ dv.original_filename }}</a>
+      <span class="file-info text-muted text-sm">Otwórz i przeczytaj przed akceptacją</span>
+    </div>
+    <a href="{{ url_for('download_version', dv_id=dv.id) }}" class="btn btn-sm btn-primary" target="_blank">⬇ Otwórz PDF</a>
+  </div>
+
+  {% if user_role == 'Administrator' and not as_admin_for and not checklist and admin_available_roles %}
+  <!-- Administrator bez wybranej roli docelowej: wybór roli „za kogoś" -->
+  <div class="alert alert-info">
+    ℹ️ Jako Administrator możesz zaakceptować <strong>za dowolną rolę</strong>, która jeszcze nie jest obsadzona.
+    Wybierz rolę, a następnie przejdź do checklisty.
+  </div>
+  <form method="GET" action="{{ url_for('approve', product_id=product.id, dv_id=dv.id) }}">
+    <div class="form-group">
+      <label class="form-label required">Akceptujesz jako…</label>
+      <select name="role" class="form-control" required>
+        <option value="">— wybierz rolę —</option>
+        {% for r in admin_available_roles %}
+        <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+      </select>
+      <p class="form-hint">Role Administratora w tym etapie nie ma na liście — jeśli chcesz zaakceptować jako Administrator, wróć i użyj przycisku „Akceptuj jako Administrator" na stronie produktu.</p>
+    </div>
+    <div class="approval-buttons">
+      <button type="submit" class="btn btn-primary btn-lg">Przejdź do checklisty →</button>
+    </div>
+  </form>
+
+  {% elif user_role == 'Administrator' and not as_admin_for and not checklist and not admin_available_roles %}
+  <div class="card-empty">
+    <p>Brak ról do obsadzenia — wszystko już zaakceptowane.</p>
+  </div>
+
+  {% else %}
+  <!-- Zwykła checklista: dla zwykłego usera, admina z wybraną rolą „za kogoś" lub admina w własnej roli -->
+  <div class="alert alert-info">
+    ℹ️ Aby zaakceptować dokumentację, odklikaj <strong>wszystkie {{ checklist|length }} punkty</strong> checklisty.
+    Jeśli coś wymaga poprawy — kliknij „Wymaga poprawy", zaznacz punkty i opisz problem.
+  </div>
+
+  <form method="POST" id="acceptForm" style="margin-top:16px">
+    {% if as_admin_for %}<input type="hidden" name="role_target" value="{{ as_admin_for }}">{% endif %}
+    <h3 style="margin-bottom:12px">Checklista ({{ user_role }})</h3>
+    <div class="checklist-group">
+      {% for point in checklist %}
+      <label class="checklist-item">
+        <input type="checkbox" name="check" value="{{ loop.index0 }}" class="checklist-check">
+        <span>{{ point }}</span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">Komentarz (opcjonalny)</label>
+      <textarea name="comment" class="form-control" rows="2"
+                placeholder="Dodaj komentarz do swojej akceptacji…"></textarea>
+    </div>
+
+    <div class="approval-buttons">
+      <button type="submit" name="decision" value="AKCEPTUJE"
+              class="btn btn-success btn-lg" id="acceptBtn" disabled>
+        ✓ Akceptuję (0/{{ checklist|length }})
+      </button>
+      <button type="button" class="btn btn-danger btn-lg" onclick="toggleCorrectionMode()">
+        ✗ Wymaga poprawy
+      </button>
+    </div>
+  </form>
+
+  <form method="POST" id="correctionForm" style="display:none;margin-top:16px">
+    {% if as_admin_for %}<input type="hidden" name="role_target" value="{{ as_admin_for }}">{% endif %}
+    <h3 style="margin-bottom:12px">Zaznacz punkty wymagające poprawy</h3>
+    <div class="checklist-group">
+      {% for point in checklist %}
+      <label class="checklist-item checklist-item--danger">
+        <input type="checkbox" name="failed_point" value="{{ point }}" class="checklist-check">
+        <span>{{ point }}</span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label required">Opis poprawki</label>
+      <textarea name="description" class="form-control" rows="3" required
+                placeholder="Opisz dokładnie, co wymaga poprawy…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Komentarz (opcjonalny)</label>
+      <textarea name="comment" class="form-control" rows="2"></textarea>
+    </div>
+
+    <input type="hidden" name="decision" value="WYMAGA_POPRAWY">
+    <div class="approval-buttons">
+      <button type="button" class="btn btn-outline btn-lg" onclick="toggleCorrectionMode()">← Wróć</button>
+      <button type="submit" class="btn btn-danger btn-lg">Wyślij zgłoszenie poprawki</button>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleCorrectionMode() {
+  var accept = document.getElementById('acceptForm');
+  var corr = document.getElementById('correctionForm');
+  if (!accept || !corr) return;
+  if (accept.style.display === 'none') {
+    accept.style.display = '';
+    corr.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    accept.style.display = 'none';
+    corr.style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+(function () {
+  var form = document.getElementById('acceptForm');
+  if (!form) return;
+  var checkboxes = form.querySelectorAll('.checklist-check');
+  var btn = document.getElementById('acceptBtn');
+  if (!btn) return;
+  var total = checkboxes.length;
+
+  function updateBtn() {
+    var checked = form.querySelectorAll('.checklist-check:checked').length;
+    btn.disabled = (checked !== total);
+    btn.textContent = (checked === total)
+      ? '✓ Akceptuję'
+      : '✓ Akceptuję (' + checked + '/' + total + ')';
+  }
+
+  checkboxes.forEach(function (cb) { cb.addEventListener('change', updateBtn); });
+  updateBtn();
+})();
+</script>
+{% endblock %}

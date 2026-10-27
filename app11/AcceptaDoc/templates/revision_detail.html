@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.number }} / Rewizja {{ revision.letter }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('products') }}">Produkty</a> ›
+      <a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.number }}</a> ›
+      <span>Rewizja {{ revision.letter }}</span>
+    </div>
+    <h1 class="page-title">
+      <span class="font-mono">{{ product.number }}</span>
+      <span class="rev-separator">/</span>
+      <span class="rev-badge">Rewizja {{ revision.letter }}</span>
+    </h1>
+    {% if product.name %}<p class="page-subtitle">{{ product.name }}</p>{% endif %}
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for('generate_report', product_id=product.id, revision_id=revision.id) }}"
+       class="btn btn-outline" title="Pobierz kartę PDF">📄 Karta PDF</a>
+    {% if session.role in ['Technolog', 'Administrator'] and revision.status != 'ZAAKCEPTOWANY' %}
+    <button class="btn btn-outline" onclick="showModal('new-version-modal')">📋 Nowa wersja dokumentacji</button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <div class="status-stages">
+    <div class="stage {% if revision.status in ['ETAP_I','ETAP_II','ZAAKCEPTOWANY'] %}stage--done{% endif %} {% if revision.status == 'ETAP_I' %}stage--active{% endif %}">
+      <span class="stage-num">1</span>
+      <span class="stage-label">Etap I – Akceptacje techniczne</span>
+    </div>
+    <div class="stage-arrow">→</div>
+    <div class="stage {% if revision.status in ['ETAP_II','ZAAKCEPTOWANY'] %}stage--done{% endif %} {% if revision.status == 'ETAP_II' %}stage--active{% endif %}">
+      <span class="stage-num">2</span>
+      <span class="stage-label">Etap II – Kontrola jakości</span>
+    </div>
+    <div class="stage-arrow">→</div>
+    <div class="stage {% if revision.status == 'ZAAKCEPTOWANY' %}stage--done stage--final{% endif %}">
+      <span class="stage-num">✓</span>
+      <span class="stage-label">Zaakceptowany</span>
+    </div>
+  </div>
+  <span class="status-badge status-{{ revision.status | lower | replace(' ','_') | replace('-','_') }} status-badge--lg">
+    {{ revision.status }}
+  </span>
+</div>
+
+<!-- Doc version info -->
+{% if current_dv %}
+<div class="doc-version-banner">
+  <div class="dv-info">
+    <span class="dv-label">Aktualna dokumentacja:</span>
+    <span class="dv-version">v{{ '%03d'|format(current_dv.version_num) }}</span>
+    <span class="dv-date text-muted">Utworzono: {{ current_dv.created_at[:16] }}</span>
+    {% if current_dv.notes %}<span class="dv-notes">{{ current_dv.notes }}</span>{% endif %}
+  </div>
+  <div class="dv-versions">
+    {% if doc_versions|length > 1 %}
+    <span class="text-muted text-sm">Historia wersji:</span>
+    {% for dv in doc_versions %}
+    <a href="{{ url_for('doc_version_detail', product_id=product.id, revision_id=revision.id, dv_id=dv.id) }}"
+       class="version-pill {% if dv.is_current %}version-pill--active{% endif %}">
+      v{{ '%03d'|format(dv.version_num) }}
+    </a>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="revision-layout">
+  <!-- LEFT: Files + Approvals -->
+  <div class="revision-main">
+
+    <!-- Files section -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">📁 Pliki dokumentacji</h3>
+        {% if session.role in ['Technolog', 'Administrator'] and revision.status != 'ZAAKCEPTOWANY' %}
+        <button class="btn btn-sm btn-primary" onclick="showModal('upload-modal')">+ Dodaj pliki</button>
+        {% endif %}
+      </div>
+      {% if files %}
+      <div class="files-by-category">
+        {% set categories = files | map(attribute='category') | unique | list %}
+        {% for cat in ['documents', 'bom', 'drawings', 'prototype_photos', 'other'] %}
+        {% set cat_files = files | selectattr('category', 'equalto', cat) | list %}
+        {% if cat_files %}
+        <div class="file-category">
+          <div class="file-category-header">
+            <span class="file-cat-icon">
+              {% if cat == 'documents' %}📄{% elif cat == 'bom' %}📊{% elif cat == 'drawings' %}📐{% elif cat == 'prototype_photos' %}📷{% else %}📎{% endif %}
+            </span>
+            {{ FILE_CATEGORY_LABELS[cat] }}
+            <span class="file-count">{{ cat_files|length }}</span>
+          </div>
+          {% for f in cat_files %}
+          <div class="file-row">
+            <span class="file-icon">{{ f.original_name.rsplit('.', 1)[-1].upper() }}</span>
+            <div class="file-meta">
+              <a href="{{ url_for('download_file', file_id=f.id) }}" class="file-name">{{ f.original_name }}</a>
+              <span class="file-info text-muted text-sm">
+                {{ (f.size_bytes / 1024)|round(1) }} KB · {{ f.uploader }} · {{ f.uploaded_at[:10] }}
+              </span>
+            </div>
+            <a href="{{ url_for('download_file', file_id=f.id) }}" class="btn btn-sm btn-ghost" title="Pobierz">⬇</a>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-empty">
+        <p>Brak plików. Dodaj dokumentację.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Approvals section -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">✅ Akceptacje – Etap I</h3>
+        {% if stage1_complete and not has_open_corrections %}
+        <span class="badge badge-success">KOMPLETNE</span>
+        {% endif %}
+      </div>
+      <div class="approvals-grid">
+        {% for rr in required_roles %}
+        {% set role_approvals = approvals | selectattr('role', 'equalto', rr.role) | list %}
+        {% set valid_approval = role_approvals | selectattr('validity', 'equalto', 'WAZNA') | list | first %}
+        <div class="approval-card {% if valid_approval %}
+          {% if valid_approval.decision == 'AKCEPTUJE' %}approval-card--approved{% else %}approval-card--rejected{% endif %}
+        {% else %}approval-card--pending{% endif %}">
+          <div class="approval-role">{{ rr.role }}</div>
+          {% if valid_approval %}
+          <div class="approval-status">
+            {% if valid_approval.decision == 'AKCEPTUJE' %}
+            <span class="approval-icon">✓</span>
+            <span class="approval-label">Zaakceptowano</span>
+            {% else %}
+            <span class="approval-icon">✗</span>
+            <span class="approval-label">Wymaga poprawy</span>
+            {% endif %}
+          </div>
+          <div class="approval-who">{{ valid_approval.full_name }}</div>
+          <div class="approval-when text-muted text-sm">{{ valid_approval.created_at[:16] }}</div>
+          {% if valid_approval.comment %}
+          <div class="approval-comment">{{ valid_approval.comment }}</div>
+          {% endif %}
+          {% else %}
+          <div class="approval-status">
+            <span class="approval-icon approval-icon--pending">⏳</span>
+            <span class="approval-label">Oczekuje</span>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- My approval action -->
+      {% set user_role_required = required_roles | selectattr('role', 'equalto', session.role) | list %}
+      {% if user_role_required and revision.status == 'ETAP_I' and not user_approval %}
+      <div class="approval-action-panel">
+        <h4>Twoja decyzja ({{ session.role }})</h4>
+        <form method="POST" action="{{ url_for('approve', product_id=product.id, revision_id=revision.id) }}"
+              id="approvalForm">
+          <input type="hidden" name="stage" value="1">
+          <div class="form-group">
+            <label class="form-label">Komentarz (opcjonalny)</label>
+            <textarea name="comment" class="form-control" rows="2" id="approvalComment"
+                      placeholder="Dodaj komentarz do swojej decyzji…"></textarea>
+          </div>
+          <div id="correctionDescField" style="display:none" class="form-group">
+            <label class="form-label required">Opis wymaganej poprawki</label>
+            <textarea name="problem_description" class="form-control" rows="3"
+                      placeholder="Opisz dokładnie, co wymaga poprawy…" id="correctionDesc"></textarea>
+          </div>
+          <div class="approval-buttons">
+            <button type="submit" name="decision" value="AKCEPTUJE" class="btn btn-success btn-lg">
+              ✓ Akceptuję
+            </button>
+            <button type="button" class="btn btn-danger btn-lg" onclick="showCorrectionField()">
+              ✗ Wymaga poprawy
+            </button>
+          </div>
+          <button type="submit" name="decision" value="WYMAGA_POPRAWY" id="submitCorrection"
+                  class="btn btn-danger" style="display:none">Wyślij zgłoszenie poprawki</button>
+        </form>
+      </div>
+      {% elif user_approval and user_approval.decision == 'AKCEPTUJE' %}
+      <div class="approval-already">
+        <span class="approval-icon">✓</span> Zatwierdziłeś tę wersję dokumentacji.
+      </div>
+      {% endif %}
+
+      <!-- Stage II action for QC -->
+      {% if revision.status == 'ETAP_II' and session.role == 'Kontrola jakości' %}
+      <div class="approval-action-panel approval-action-panel--stage2">
+        <h4>🔍 Etap II – Kontrola jakości pierwszej sztuki</h4>
+        <form method="POST" action="{{ url_for('approve', product_id=product.id, revision_id=revision.id) }}">
+          <input type="hidden" name="stage" value="2">
+          <div class="form-group">
+            <label class="form-label">Komentarz</label>
+            <textarea name="comment" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="approval-buttons">
+            <button type="submit" name="decision" value="AKCEPTUJE" class="btn btn-success btn-lg">
+              ✓ Etap II zaakceptowany
+            </button>
+            <button type="submit" name="decision" value="WYMAGA_POPRAWY" class="btn btn-danger btn-lg">
+              ✗ Wymaga poprawy (Etap I od nowa)
+            </button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Corrections -->
+    {% if corrections %}
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">🔧 Zgłoszenia poprawek</h3>
+      </div>
+      {% for c in corrections %}
+      <div class="correction-item correction-item--{{ c.status | lower }}">
+        <div class="correction-header">
+          <span class="correction-status-badge">{{ c.status }}</span>
+          <span class="correction-who">{{ c.full_name }} ({{ c.role }})</span>
+          <span class="text-muted text-sm">{{ c.created_at[:16] }}</span>
+        </div>
+        <p class="correction-desc">{{ c.description }}</p>
+        {% if session.role in ['Technolog', 'Administrator'] and c.status == 'OTWARTE' and revision.status != 'ZAAKCEPTOWANY' %}
+        <form method="POST" action="{{ url_for('new_doc_version', product_id=product.id, revision_id=revision.id) }}"
+              class="correction-action">
+          <input type="hidden" name="correction_request_id" value="{{ c.id }}">
+          <div class="form-group">
+            <input type="text" name="notes" class="form-control" placeholder="Notatka do nowej wersji dokumentacji…">
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary">
+            📋 Utwórz nową wersję dokumentacji (rozwiązuje tę poprawkę)
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- RIGHT: History -->
+  <div class="revision-sidebar">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">🕐 Historia zdarzeń</h3>
+      </div>
+      <div class="history-list">
+        {% for h in history %}
+        <div class="history-item">
+          <div class="history-time text-muted text-sm">{{ h.created_at[:16] }}</div>
+          <div class="history-event">
+            <span class="history-type event-{{ h.event_type | lower }}">{{ h.event_type }}</span>
+            <span class="history-desc">{{ h.description }}</span>
+          </div>
+          {% if h.full_name %}
+          <div class="history-who text-muted text-sm">{{ h.full_name }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload modal -->
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Dodaj pliki</h3>
+      <button class="modal-close" onclick="hideModal('upload-modal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('upload_file', product_id=product.id, revision_id=revision.id) }}"
+          enctype="multipart/form-data">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Kategoria</label>
+          <select name="category" class="form-control">
+            {% for k, v in FILE_CATEGORY_LABELS.items() %}
+            <option value="{{ k }}">{{ v }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pliki</label>
+          <div class="file-drop-zone" id="dropZone">
+            <input type="file" name="files" id="fileInput" multiple class="file-input">
+            <div class="drop-zone-content">
+              <span class="drop-icon">📁</span>
+              <p>Przeciągnij pliki lub <label for="fileInput" class="drop-link">kliknij aby wybrać</label></p>
+              <p class="text-muted text-sm">PDF, XLSX, DOCX, JPG, PNG, DWG, STEP…</p>
+            </div>
+            <div class="file-list" id="fileList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="hideModal('upload-modal')">Anuluj</button>
+        <button type="submit" class="btn btn-primary">Prześlij pliki</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- New version modal -->
+<div class="modal-overlay" id="new-version-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Nowa wersja dokumentacji</h3>
+      <button class="modal-close" onclick="hideModal('new-version-modal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('new_doc_version', product_id=product.id, revision_id=revision.id) }}">
+      <div class="modal-body">
+        <div class="alert-info-box">
+          ⚠️ Utworzenie nowej wersji <strong>unieważni wszystkie akceptacje Etapu I</strong> dla bieżącej wersji.
+          Etap I rozpocznie się od nowa.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notatka (powód utworzenia nowej wersji)</label>
+          <textarea name="notes" class="form-control" rows="3"
+                    placeholder="Opisz, co zostało zmienione w nowej wersji…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="hideModal('new-version-modal')">Anuluj</button>
+        <button type="submit" class="btn btn-danger">Utwórz nową wersję dokumentacji</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showCorrectionField() {
+  document.getElementById('correctionDescField').style.display = 'block';
+  document.getElementById('submitCorrection').style.display = 'inline-block';
+  document.getElementById('correctionDesc').required = true;
+  document.querySelector('[value="WYMAGA_POPRAWY"].btn-danger:not(#submitCorrection)').style.display = 'none';
+  document.querySelector('[value="AKCEPTUJE"]').style.display = 'none';
+}
+</script>
+{% endblock %}

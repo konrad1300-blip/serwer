@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.number }} / Rev {{ revision.letter }} / v{{ '%03d'|format(dv.version_num) }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('products') }}">Produkty</a> ›
+      <a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.number }}</a> ›
+      <a href="{{ url_for('revision_detail', product_id=product.id, revision_id=revision.id) }}">Rewizja {{ revision.letter }}</a> ›
+      <span>v{{ '%03d'|format(dv.version_num) }}</span>
+    </div>
+    <h1 class="page-title">
+      Dokumentacja <span class="version-tag version-tag--lg">v{{ '%03d'|format(dv.version_num) }}</span>
+      {% if not dv.is_current %}<span class="badge badge-archived">Archiwalna</span>{% endif %}
+    </h1>
+    <p class="page-subtitle">{{ product.number }} / Rewizja {{ revision.letter }} · {{ dv.created_at[:16] }}</p>
+    {% if dv.notes %}<p class="page-subtitle">{{ dv.notes }}</p>{% endif %}
+  </div>
+</div>
+
+<!-- Files -->
+<div class="card">
+  <div class="card-header"><h3 class="card-title">📁 Pliki</h3></div>
+  {% if files %}
+  <div class="files-by-category">
+    {% for cat in ['documents', 'bom', 'drawings', 'prototype_photos', 'other'] %}
+    {% set cat_files = files | selectattr('category', 'equalto', cat) | list %}
+    {% if cat_files %}
+    <div class="file-category">
+      <div class="file-category-header">
+        {% if cat == 'documents' %}📄{% elif cat == 'bom' %}📊{% elif cat == 'drawings' %}📐{% elif cat == 'prototype_photos' %}📷{% else %}📎{% endif %}
+        {{ FILE_CATEGORY_LABELS[cat] }}
+      </div>
+      {% for f in cat_files %}
+      <div class="file-row">
+        <span class="file-icon">{{ f.original_name.rsplit('.', 1)[-1].upper() }}</span>
+        <div class="file-meta">
+          <a href="{{ url_for('download_file', file_id=f.id) }}" class="file-name">{{ f.original_name }}</a>
+          <span class="file-info text-muted text-sm">{{ (f.size_bytes / 1024)|round(1) }} KB · {{ f.uploader }} · {{ f.uploaded_at[:10] }}</span>
+        </div>
+        <a href="{{ url_for('download_file', file_id=f.id) }}" class="btn btn-sm btn-ghost">⬇</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card-empty"><p>Brak plików w tej wersji.</p></div>
+  {% endif %}
+</div>
+
+<!-- Approvals -->
+<div class="card">
+  <div class="card-header"><h3 class="card-title">✅ Decyzje akceptacji</h3></div>
+  {% if approvals %}
+  <table class="table">
+    <thead>
+      <tr><th>Rola</th><th>Osoba</th><th>Decyzja</th><th>Data</th><th>Ważność</th><th>Komentarz</th></tr>
+    </thead>
+    <tbody>
+      {% for a in approvals %}
+      <tr>
+        <td>{{ a.role }}</td>
+        <td>{{ a.full_name }}</td>
+        <td>
+          <span class="decision-badge {% if a.decision == 'AKCEPTUJE' %}decision-badge--ok{% else %}decision-badge--nok{% endif %}">
+            {{ a.decision }}
+          </span>
+        </td>
+        <td class="text-sm">{{ a.created_at[:16] }}</td>
+        <td>
+          <span class="validity-badge {% if a.validity == 'WAZNA' %}validity-badge--valid{% else %}validity-badge--invalid{% endif %}">
+            {{ a.validity }}
+          </span>
+        </td>
+        <td class="text-muted text-sm">{{ a.comment or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="card-empty"><p>Brak decyzji akceptacji.</p></div>
+  {% endif %}
+</div>
+
+<!-- Corrections -->
+{% if corrections %}
+<div class="card">
+  <div class="card-header"><h3 class="card-title">🔧 Zgłoszenia poprawek</h3></div>
+  {% for c in corrections %}
+  <div class="correction-item correction-item--{{ c.status | lower }}">
+    <div class="correction-header">
+      <span class="correction-status-badge">{{ c.status }}</span>
+      <span class="correction-who">{{ c.full_name }} ({{ c.role }})</span>
+      <span class="text-muted text-sm">{{ c.created_at[:16] }}</span>
+    </div>
+    <p class="correction-desc">{{ c.description }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

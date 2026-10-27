@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Pomoc{% endblock %}
+{% block content %}
+<div class="help-page">
+
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">
+        <a href="{{ url_for('dashboard') }}">Panel</a> ›
+        <span>Pomoc</span>
+      </div>
+      <h1 class="page-title">📚 Instrukcja użytkownika</h1>
+      <p class="page-subtitle">Wszystko, co trzeba wiedzieć, żeby sprawnie korzystać z AcceptaDoc.</p>
+    </div>
+  </div>
+
+  <nav class="help-toc">
+    <div class="help-toc-title">Spis treści</div>
+    <ol>
+      {% for section in sections %}
+      <li>
+        <a href="#sekcja-{{ section.id }}">
+          <span class="help-toc-icon">{{ section.icon }}</span>
+          {{ loop.index }}. {{ section.title }}
+        </a>
+      </li>
+      {% endfor %}
+    </ol>
+  </nav>
+
+  {% for section in sections %}
+  <section class="help-section" id="sekcja-{{ section.id }}">
+    <h2 class="help-section-title">
+      <span class="help-section-icon">{{ section.icon }}</span>
+      {{ loop.index }}. {{ section.title }}
+    </h2>
+
+    {% for block in section.blocks %}
+      {% if block.type == 'p' %}
+        <p>{{ block.text | safe }}</p>
+      {% elif block.type == 'h3' %}
+        <h3>{{ block.text | safe }}</h3>
+      {% elif block.type == 'ul' %}
+        <ul>
+          {% for item in block['items'] %}<li>{{ item | safe }}</li>{% endfor %}
+        </ul>
+      {% elif block.type == 'ol' %}
+        <ol>
+          {% for item in block['items'] %}<li>{{ item | safe }}</li>{% endfor %}
+        </ol>
+      {% elif block.type == 'example' %}
+        <div class="help-example">
+          <div class="help-example-label">Przykład z życia</div>
+          {{ block.text | safe }}
+        </div>
+      {% elif block.type == 'note' %}
+        <div class="help-note">
+          <div class="help-note-label">Uwaga</div>
+          {{ block.text | safe }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </section>
+  {% endfor %}
+
+  <div class="help-footer">
+    <a href="#" class="btn btn-outline">↑ Wróć na górę</a>
+  </div>
+</div>
+{% endblock %}

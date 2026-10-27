@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Produkty{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Produkty</h1>
+    <p class="page-subtitle">Wyszukiwarka i archiwum dokumentacji</p>
+  </div>
+  {% if session.get('roles', []) | select('in', ['Konstruktor-Technolog', 'Technolog', 'Technolog-Wdrożeniowiec', 'Administrator']) | list %}
+  <a href="{{ url_for('product_new') }}" class="btn btn-primary">+ Nowy produkt</a>
+  {% endif %}
+</div>
+
+<div class="card search-card">
+  <form method="GET" class="search-form">
+    <div class="search-row">
+      <div class="form-group flex-1">
+        <label class="form-label">Szukaj</label>
+        <input type="text" name="q" class="form-control" value="{{ q }}"
+               placeholder="Nazwa produktu (np. 001-1119-004…)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-control">
+          <option value="">Wszystkie</option>
+          <option value="ETAP I" {% if status_filter == 'ETAP I' %}selected{% endif %}>Etap I</option>
+          <option value="ETAP II" {% if status_filter == 'ETAP II' %}selected{% endif %}>Etap II</option>
+          <option value="WYMAGA POPRAWY" {% if status_filter == 'WYMAGA POPRAWY' %}selected{% endif %}>Wymaga poprawy</option>
+          <option value="ZAAKCEPTOWANY" {% if status_filter == 'ZAAKCEPTOWANY' %}selected{% endif %}>Zaakceptowany</option>
+        </select>
+      </div>
+      <div class="form-group form-group--btn">
+        <button type="submit" class="btn btn-primary">Szukaj</button>
+        <a href="{{ url_for('products') }}" class="btn btn-outline">Resetuj</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if items %}
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Produkt</th>
+          <th>Wersja</th>
+          <th>Status</th>
+          <th>Utworzono</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in items %}
+        <tr class="table-row-link" data-href="{{ url_for('product_detail', product_id=p.id) }}">
+          <td><span class="font-mono product-number">{{ p.name }}</span></td>
+          <td>{% if p.version_num %}<span class="version-tag">v{{ '%03d'|format(p.version_num) }}</span>{% else %}—{% endif %}</td>
+          <td><span class="status-badge status-{{ p.status | lower | replace(' ', '_') }}">{{ p.status }}</span></td>
+          <td class="text-muted text-sm">{{ p.created_at[:10] }}</td>
+          <td><a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-sm btn-ghost">Otwórz →</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="results-count">Znaleziono: <strong>{{ items|length }}</strong> produktów</p>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🔍</div>
+  <p>Brak wyników dla podanych kryteriów.</p>
+</div>
+{% endif %}
+{% endblock %}

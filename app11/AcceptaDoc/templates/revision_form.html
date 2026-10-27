@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Rewizja {{ product.number }} / {{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('products') }}">Produkty</a> ›
+      <a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.number }}</a> ›
+      <span>Nowa rewizja</span>
+    </div>
+    <h1 class="page-title">{{ title }}</h1>
+    <p class="page-subtitle">Produkt: <span class="font-mono">{{ product.number }}</span> {% if product.name %}– {{ product.name }}{% endif %}</p>
+  </div>
+</div>
+
+<div class="card form-card">
+  <form method="POST" class="form">
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label required" for="letter">Kod rewizji</label>
+        <input type="text" id="letter" name="letter" class="form-control font-mono text-center"
+               maxlength="3" pattern="R\d{2}" required placeholder="R01"
+               title="Format: R + dwie cyfry (np. R01, R02, R11)"
+               style="font-size: 2rem; width: 120px; text-transform: uppercase;">
+        <p class="form-hint">Format: <code>R + dwie cyfry</code> (np. R01, R02, … R11)</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="notes">Notatki do rewizji</label>
+      <textarea id="notes" name="notes" class="form-control" rows="2"
+                placeholder="Opis zmian w tej rewizji…"></textarea>
+    </div>
+
+    <!-- Required roles -->
+    <div class="form-group">
+      <label class="form-label required">Wymagane role (Etap I)</label>
+      <p class="form-hint">Wybierz role, które muszą zaakceptować dokumentację w Etapie I.</p>
+      <div class="roles-grid">
+        {% for role in roles %}
+        {% if role != 'Administrator' %}
+        <label class="role-checkbox">
+          <input type="checkbox" name="required_roles" value="{{ role }}"
+                 {% if role in ['Technolog', 'Konstruktor'] %}checked{% endif %}>
+          <span class="role-checkbox-label">{{ role }}</span>
+        </label>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-outline">Anuluj</a>
+      <button type="submit" class="btn btn-primary">Utwórz rewizję →</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

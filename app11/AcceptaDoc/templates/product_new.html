@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Nowy produkt{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('products') }}">Produkty</a> ›
+      <span>Nowy produkt</span>
+    </div>
+    <h1 class="page-title">Nowy produkt</h1>
+    <p class="page-subtitle">Wgraj plik PDF z mobidoc — jego nazwa stanie się nazwą produktu</p>
+  </div>
+</div>
+
+<div class="card form-card">
+  <form method="POST" enctype="multipart/form-data" class="form" id="newProductForm">
+    <div class="form-group">
+      <label class="form-label required">Plik dokumentacji z mobidoc</label>
+      <div class="file-drop-zone" id="dropZone">
+        <input type="file" name="file" id="fileInput" class="file-input" accept=".pdf,application/pdf" required>
+        <div class="drop-zone-content">
+          <span class="drop-icon">📁</span>
+          <p>Przeciągnij plik PDF tutaj lub <label for="fileInput" class="drop-link">kliknij, aby wybrać</label></p>
+          <p class="text-muted text-sm">Wymagane rozszerzenie: .pdf</p>
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nazwa produktu (podgląd)</label>
+      <input type="text" id="productNamePreview" class="form-control font-mono" disabled
+             placeholder="Nazwa pojawi się po wybraniu pliku…">
+      <p class="form-hint">
+        Nazwa produktu = nazwa pliku bez <code>.pdf</code>. Jeśli w bazie już istnieje taki produkt, system dopisze <code>1</code> na końcu.
+      </p>
+    </div>
+
+    <div class="alert alert-warning" style="margin-top:16px">
+      ⚠️ Utworzenie produktu bez pliku jest niemożliwe. Plik zostanie przypisany do wersji <strong>v001</strong>.
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('products') }}" class="btn btn-outline">Anuluj</a>
+      <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Utwórz produkt →</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var fileInput = document.getElementById('fileInput');
+  var dropZone = document.getElementById('dropZone');
+  var fileList = document.getElementById('fileList');
+  var preview = document.getElementById('productNamePreview');
+  var submitBtn = document.getElementById('submitBtn');
+
+  function updatePreview(file) {
+    fileList.innerHTML = '';
+    if (!file) {
+      preview.value = '';
+      submitBtn.disabled = true;
+      return;
+    }
+    var size = file.size > 1024 * 1024
+      ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
+      : (file.size / 1024).toFixed(1) + ' KB';
+    var ext = file.name.split('.').pop().toLowerCase();
+    var item = document.createElement('div');
+    item.className = 'file-list-item';
+    item.innerHTML = '<span style="font-size:.7rem;background:#6366f1;color:white;padding:1px 5px;border-radius:3px">'
+                   + ext.toUpperCase() + '</span><span>' + file.name + '</span>'
+                   + '<span style="margin-left:auto;color:#8b949e">' + size + '</span>';
+    fileList.appendChild(item);
+
+    if (ext !== 'pdf') {
+      preview.value = '— wymagany plik PDF —';
+      submitBtn.disabled = true;
+      return;
+    }
+    preview.value = file.name.replace(/\.pdf$/i, '');
+    submitBtn.disabled = false;
+  }
+
+  fileInput.addEventListener('change', function () {
+    updatePreview(fileInput.files[0]);
+  });
+
+  ['dragenter', 'dragover'].forEach(function (e) {
+    dropZone.addEventListener(e, function (ev) {
+      ev.preventDefault();
+      dropZone.classList.add('dragging');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (e) {
+    dropZone.addEventListener(e, function (ev) {
+      ev.preventDefault();
+      dropZone.classList.remove('dragging');
+    });
+  });
+  dropZone.addEventListener('drop', function (ev) {
+    ev.preventDefault();
+    var files = ev.dataTransfer.files;
+    if (files.length) {
+      fileInput.files = files;
+      updatePreview(files[0]);
+    }
+  });
+})();
+</script>
+{% endblock %}

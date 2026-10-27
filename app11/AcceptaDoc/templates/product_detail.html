@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+{% set is_admin = 'Administrator' in session.get('roles', []) %}
+{% set current_status = status %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('products') }}">Produkty</a> ›
+      <span>{{ product.name }}</span>
+    </div>
+    <h1 class="page-title font-mono">{{ product.name }}</h1>
+    <p class="page-subtitle">
+      {% if current_dv %}
+        Wersja <span class="version-tag">v{{ '%03d'|format(current_dv.version_num) }}</span>
+        · {{ current_dv.original_filename }}
+      {% endif %}
+    </p>
+  </div>
+  <div class="header-actions">
+    {% if current_dv %}
+    <a href="{{ url_for('generate_report', product_id=product.id) }}" class="btn btn-outline">
+      📄 Karta PDF
+    </a>
+    {% endif %}
+    {% if can_upload %}
+    <button class="btn btn-outline" onclick="showModal('upload-modal')">
+      📁 Wymień dokumentację
+    </button>
+    {% endif %}
+    {% if is_admin %}
+    <button class="btn btn-danger" onclick="showModal('delete-product-modal')">
+      🗑 Usuń produkt
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <div class="status-stages">
+    <div class="stage {% if current_status in ['ETAP I','ETAP II','ZAAKCEPTOWANY'] %}stage--done{% endif %} {% if current_status == 'ETAP I' %}stage--active{% endif %}">
+      <span class="stage-num">1</span>
+      <span class="stage-label">Etap I — akceptacje techniczne</span>
+    </div>
+    <div class="stage-arrow">→</div>
+    <div class="stage {% if current_status in ['ETAP II','ZAAKCEPTOWANY'] %}stage--done{% endif %} {% if current_status == 'ETAP II' %}stage--active{% endif %}">
+      <span class="stage-num">2</span>
+      <span class="stage-label">Etap II — QC + Administrator</span>
+    </div>
+    <div class="stage-arrow">→</div>
+    <div class="stage {% if current_status == 'ZAAKCEPTOWANY' %}stage--done stage--final{% endif %}">
+      <span class="stage-num">✓</span>
+      <span class="stage-label">Zaakceptowany</span>
+    </div>
+  </div>
+  <span class="status-badge status-{{ current_status | lower | replace(' ', '_') }} status-badge--lg">
+    {{ current_status }}
+  </span>
+</div>
+
+<div class="revision-layout">
+  <div class="revision-main">
+
+    <!-- Dokumentacja (bieżąca wersja) -->
+    {% if current_dv %}
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">📁 Dokumentacja bieżącej wersji</h3>
+      </div>
+      <div class="file-row">
+        <span class="file-icon">PDF</span>
+        <div class="file-meta">
+          <a href="{{ url_for('download_version', dv_id=current_dv.id) }}" class="file-name">{{ current_dv.original_filename }}</a>
+          <span class="file-info text-muted text-sm">
+            v{{ '%03d'|format(current_dv.version_num) }}
+            · utworzono {{ current_dv.created_at[:16] }}
+          </span>
+        </div>
+        <a href="{{ url_for('download_version', dv_id=current_dv.id) }}" class="btn btn-sm btn-ghost" title="Pobierz">⬇</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Wersje -->
+    {% if versions|length > 1 %}
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">🕐 Historia wersji ({{ versions|length }})</h3>
+      </div>
+      <div class="version-list">
+        {% for v in versions %}
+        <div class="version-row {% if v.is_current %}version-row--current{% endif %}">
+          <span class="version-tag">v{{ '%03d'|format(v.version_num) }}</span>
+          <span class="font-mono text-sm">{{ v.original_filename }}</span>
+          <span class="text-muted text-sm">{{ v.created_at[:16] }}</span>
+          {% if v.is_current %}<span class="badge badge-current">Aktualna</span>{% endif %}
+          <a href="{{ url_for('download_version', dv_id=v.id) }}" class="btn btn-sm btn-ghost">⬇</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if current_dv %}
+    <!-- Akceptacje Etapu I -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">✅ Akceptacje — Etap I</h3>
+        {% set stage1_count = approvals | selectattr('stage', 'equalto', 1) | selectattr('validity', 'equalto', 'WAZNA') | selectattr('decision', 'equalto', 'AKCEPTUJE') | map(attribute='role') | unique | list | length %}
+        <span class="badge {% if stage1_count == STAGE1_ROLES|length %}badge-success{% else %}badge-warning{% endif %}">
+          {{ stage1_count }} / {{ STAGE1_ROLES|length }}
+        </span>
+      </div>
+      <table class="table table-compact">
+        <thead>
+          <tr><th>Rola</th><th>Przedstawiciel</th><th>Decyzja</th><th>Data</th><th>Komentarz</th></tr>
+        </thead>
+        <tbody>
+          {% for role in STAGE1_ROLES %}
+          {% set a = approvals | selectattr('stage', 'equalto', 1) | selectattr('role', 'equalto', role) | selectattr('validity', 'equalto', 'WAZNA') | selectattr('decision', 'equalto', 'AKCEPTUJE') | list | first %}
+          <tr>
+            <td><span class="role-chip">{{ role }}</span></td>
+            <td>
+              {% if a %}
+                {{ a.full_name }}
+                {% if a.on_behalf_of %}
+                <div class="text-muted text-sm">wykonane przez: {{ a.acted_by_name or '—' }} (Administrator)</div>
+                {% endif %}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if a %}
+                <span class="decision-badge decision-badge--ok">✓ Akceptuje</span>
+              {% elif current_status == 'WYMAGA POPRAWY' %}
+                <span class="decision-badge decision-badge--nok">✗ Wymaga poprawy</span>
+              {% else %}
+                <span class="text-muted text-sm">⏳ Oczekuje</span>
+              {% endif %}
+            </td>
+            <td class="text-sm">{{ a.created_at[:16] if a else '—' }}</td>
+            <td class="text-muted text-sm">{{ (a.comment or '—') if a else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Akceptacje Etapu II -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">🔍 Akceptacje — Etap II (QC + Administrator)</h3>
+        {% set stage2_count = approvals | selectattr('stage', 'equalto', 2) | selectattr('validity', 'equalto', 'WAZNA') | selectattr('decision', 'equalto', 'AKCEPTUJE') | map(attribute='role') | unique | list | length %}
+        <span class="badge {% if stage2_count == STAGE2_ROLES|length %}badge-success{% else %}badge-warning{% endif %}">
+          {{ stage2_count }} / {{ STAGE2_ROLES|length }}
+        </span>
+      </div>
+      <table class="table table-compact">
+        <thead>
+          <tr><th>Rola</th><th>Przedstawiciel</th><th>Decyzja</th><th>Data</th><th>Komentarz</th></tr>
+        </thead>
+        <tbody>
+          {% for role in STAGE2_ROLES %}
+          {% set a = approvals | selectattr('stage', 'equalto', 2) | selectattr('role', 'equalto', role) | selectattr('validity', 'equalto', 'WAZNA') | selectattr('decision', 'equalto', 'AKCEPTUJE') | list | first %}
+          <tr>
+            <td><span class="role-chip {% if role == 'Administrator' %}role-chip--admin{% endif %}">{{ role }}</span></td>
+            <td>
+              {% if a %}
+                {{ a.full_name }}
+                {% if a.on_behalf_of %}
+                <div class="text-muted text-sm">wykonane przez: {{ a.acted_by_name or '—' }} (Administrator)</div>
+                {% endif %}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if a %}
+                <span class="decision-badge decision-badge--ok">✓ Akceptuje</span>
+              {% else %}
+                <span class="text-muted text-sm">⏳ Oczekuje</span>
+              {% endif %}
+            </td>
+            <td class="text-sm">{{ a.created_at[:16] if a else '—' }}</td>
+            <td class="text-muted text-sm">{{ (a.comment or '—') if a else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Panel akcji użytkownika (zwykłe role) -->
+    {% if user_stage1_role or user_stage2_role %}
+    <div class="approval-action-panel">
+      <h4>
+        {% if user_stage1_role %}Twoja decyzja — Etap I jako <strong>{{ user_stage1_role }}</strong>{% endif %}
+        {% if user_stage2_role %}Twoja decyzja — Etap II jako <strong>{{ user_stage2_role }}</strong>{% endif %}
+      </h4>
+      <a href="{{ url_for('approve', product_id=product.id, dv_id=current_dv.id) }}" class="btn btn-primary btn-lg">
+        Przejdź do checklisty i akceptuj →
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Panel akcji administratora -->
+    {% if is_admin and (admin_own_role or admin_available_roles) %}
+    <div class="approval-action-panel" style="border-color: var(--warning); background: var(--warning-bg);">
+      <h4>🛡️ Administrator — akceptacja</h4>
+
+      {% if admin_own_role %}
+      <p class="text-sm" style="margin-bottom: 10px;">
+        Możesz zaakceptować w <strong>swojej własnej roli (Administrator)</strong> w Etapie II.
+      </p>
+      <div style="margin-bottom: 14px;">
+        <a href="{{ url_for('approve', product_id=product.id, dv_id=current_dv.id, role='Administrator') }}"
+           class="btn btn-primary btn-lg">
+          ✓ Akceptuj jako <strong>Administrator</strong>
+        </a>
+      </div>
+      {% endif %}
+
+      {% if admin_available_roles %}
+      <p class="text-sm" style="margin-bottom: 10px;">
+        {% if admin_own_role %}
+        Możesz też zaakceptować <strong>za kogoś</strong> — za dowolną rolę, która nie jest jeszcze obsadzona.
+        {% else %}
+        Możesz zaakceptować <strong>za dowolną rolę</strong> w bieżącym etapie, która nie jest jeszcze obsadzona.
+        {% endif %}
+        Twoja akceptacja zostanie odnotowana w raporcie jako <em>Administrator za: [rola]</em>.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        {% for r in admin_available_roles %}
+        <a href="{{ url_for('approve', product_id=product.id, dv_id=current_dv.id, role=r) }}"
+           class="btn btn-sm btn-outline">
+          Akceptuj jako: <strong>{{ r }}</strong>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Info: user już zaakceptował -->
+    {% set my_approval = approvals | selectattr('user_id', 'equalto', session.user_id) | selectattr('validity', 'equalto', 'WAZNA') | selectattr('decision', 'equalto', 'AKCEPTUJE') | list | first %}
+    {% if my_approval and not user_stage1_role and not user_stage2_role and not admin_own_role and not admin_available_roles %}
+    <div class="approval-already">
+      ✓ Zatwierdziłeś tę wersję jako <strong>{{ my_approval.role }}</strong> ({{ my_approval.created_at[:16] }}).
+    </div>
+    {% endif %}
+
+    <!-- Zgłoszenia poprawek -->
+    {% if corrections %}
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">🔧 Zgłoszenia poprawek</h3>
+      </div>
+      {% for c in corrections %}
+      <div class="correction-item correction-item--{{ c.status | lower }}">
+        <div class="correction-header">
+          <span class="correction-status-badge">{{ c.status }}</span>
+          <span class="correction-who">{{ c.full_name }} ({{ c.role }})</span>
+          <span class="text-muted text-sm">{{ c.created_at[:16] }}</span>
+        </div>
+        <p class="correction-desc">{{ c.description }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+
+  <!-- Historia -->
+  <div class="revision-sidebar">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">🕐 Historia zdarzeń</h3>
+      </div>
+      <div class="history-list">
+        {% for h in history %}
+        <div class="history-item">
+          <div class="history-time text-muted text-sm">{{ h.created_at[:16] }}</div>
+          <div class="history-event">
+            <span class="history-type">{{ h.event_type }}</span>
+            <span class="history-desc">{{ h.description }}</span>
+          </div>
+          {% if h.full_name %}<div class="history-who text-muted text-sm">{{ h.full_name }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload modal -->
+{% if can_upload and current_dv %}
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Wymień dokumentację</h3>
+      <button class="modal-close" onclick="hideModal('upload-modal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('product_upload_version', product_id=product.id) }}"
+          enctype="multipart/form-data">
+      <div class="modal-body">
+        {% set valid_approvals_count = approvals | selectattr('validity', 'equalto', 'WAZNA') | selectattr('decision', 'equalto', 'AKCEPTUJE') | list | length %}
+        {% if valid_approvals_count == 0 %}
+        <div class="alert alert-success">
+          ✓ Zero akceptacji w bieżącej wersji — plik zostanie <strong>zastąpiony</strong> w tej samej wersji (v{{ '%03d'|format(current_dv.version_num) }}).
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+          ⚠️ Ta wersja ma już {{ valid_approvals_count }}
+          {{ 'akceptację' if valid_approvals_count == 1 else 'akceptacje' }}.
+          Wgranie nowego pliku utworzy <strong>nową wersję (v{{ '%03d'|format(current_dv.version_num + 1) }})</strong>
+          i <strong>unieważni wszystkie dotychczasowe akceptacje</strong>. Etap I zacznie się od nowa.
+        </div>
+        {% endif %}
+        <div class="form-group">
+          <label class="form-label required">Nowy plik PDF z mobidoc</label>
+          <input type="file" name="file" class="form-control" accept=".pdf,application/pdf" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="hideModal('upload-modal')">Anuluj</button>
+        <button type="submit" class="btn btn-primary">Wgraj plik</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<!-- Delete modal -->
+{% if is_admin %}
+<div class="modal-overlay" id="delete-product-modal">
+  <div class="modal modal--danger">
+    <div class="modal-header">
+      <h3>🗑 Usuń produkt trwale</h3>
+      <button class="modal-close" onclick="hideModal('delete-product-modal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('admin_product_delete', product_id=product.id) }}">
+      <div class="modal-body">
+        <div class="delete-warning-box">
+          <strong>⚠️ Operacja nieodwracalna.</strong>
+          <p>Trwale usunięte zostaną:</p>
+          <ul>
+            <li>produkt <code>{{ product.name }}</code></li>
+            <li>wszystkie wersje ({{ versions|length }})</li>
+            <li>wszystkie akceptacje i zgłoszenia poprawek</li>
+            <li>pliki z dysku</li>
+          </ul>
+          <p>Wpisy w dzienniku zdarzeń zostaną zachowane (bez powiązania z produktem).</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Aby potwierdzić, wpisz nazwę produktu</label>
+          <input type="text" name="confirm_name" id="confirmName" class="form-control font-mono"
+                 autocomplete="off" required>
+          <p class="form-hint">Wpisz dokładnie: <code>{{ product.name }}</code></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="hideModal('delete-product-modal')">Anuluj</button>
+        <button type="submit" class="btn btn-danger" id="deleteBtn" disabled>Usuń trwale</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if is_admin %}
+<script>
+(function () {
+  var expected = {{ product.name | tojson }};
+  var input = document.getElementById('confirmName');
+  var btn = document.getElementById('deleteBtn');
+  if (!input || !btn) return;
+  input.addEventListener('input', function () {
+    btn.disabled = (input.value.trim() !== expected);
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Mój profil{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">👤 Mój profil</h1>
+</div>
+
+<div class="card form-card">
+  <div class="profile-info">
+    <div class="avatar-lg">{{ user.full_name[0] }}</div>
+    <div>
+      <div class="profile-name">{{ user.full_name }}</div>
+      <div class="profile-role">
+        {% for r in roles %}
+        <span class="role-chip {% if r == 'Administrator' %}role-chip--admin{% endif %}">{{ r }}</span>
+        {% endfor %}
+      </div>
+      <div class="profile-username text-muted">@{{ user.username }}</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <h3>Zmiana hasła</h3>
+  <form method="POST" class="form">
+    <div class="form-group">
+      <label class="form-label required">Aktualne hasło</label>
+      <input type="password" name="current_password" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label required">Nowe hasło (min. 6 znaków)</label>
+      <input type="password" name="new_password" class="form-control" minlength="6" required>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Zmień hasło</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

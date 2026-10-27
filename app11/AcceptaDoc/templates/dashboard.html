@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Panel główny{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Panel główny</h1>
+  <p class="page-subtitle">Witaj, <strong>{{ session.full_name }}</strong></p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">📦</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="stat-label">Wszystkich produktów</div>
+    </div>
+  </div>
+  <div class="stat-card {% if stats.my_tasks > 0 %}stat-card--urgent{% endif %}">
+    <div class="stat-icon">📝</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ stats.my_tasks }}</div>
+      <div class="stat-label">Moich zadań do akceptacji</div>
+    </div>
+  </div>
+</div>
+
+{% if my_tasks %}
+<div class="section">
+  <div class="section-header">
+    <h2 class="section-title">🔔 Moje zadania</h2>
+    <span class="badge badge-danger">{{ my_tasks|length }}</span>
+  </div>
+  <div class="card">
+    <table class="table">
+      <thead>
+        <tr><th>Produkt</th><th>Wersja</th><th>Twoja rola</th><th>Utworzono</th><th>Akcja</th></tr>
+      </thead>
+      <tbody>
+        {% for t in my_tasks %}
+        <tr>
+          <td class="font-mono">{{ t.product_name }}</td>
+          <td><span class="version-tag">v{{ '%03d'|format(t.version_num) }}</span></td>
+          <td><span class="role-chip">{{ t.my_role }}</span></td>
+          <td class="text-muted text-sm">{{ t.created_at[:16] }}</td>
+          <td>
+            <a href="{{ url_for('product_detail', product_id=t.product_id) }}" class="btn btn-sm btn-primary">
+              Przejdź do akceptacji →
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="section">
+  <div class="section-header">
+    <h2 class="section-title">🕐 Ostatnie produkty</h2>
+    <a href="{{ url_for('products') }}" class="btn btn-sm btn-outline">Zobacz wszystkie</a>
+    {% if session.get('roles', []) | select('in', ['Konstruktor-Technolog', 'Technolog', 'Technolog-Wdrożeniowiec', 'Administrator']) | list %}
+    <a href="{{ url_for('product_new') }}" class="btn btn-sm btn-primary">+ Nowy produkt</a>
+    {% endif %}
+  </div>
+  {% if recent %}
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Produkt</th><th>Wersja</th><th>Status</th><th>Utworzono</th><th></th></tr></thead>
+      <tbody>
+        {% for p in recent %}
+        <tr>
+          <td class="font-mono">{{ p.name }}</td>
+          <td>{% if p.version_num %}<span class="version-tag">v{{ '%03d'|format(p.version_num) }}</span>{% else %}—{% endif %}</td>
+          <td>
+            <span class="status-badge status-{{ p.status | lower | replace(' ', '_') }}">{{ p.status }}</span>
+          </td>
+          <td class="text-muted text-sm">{{ p.created_at[:10] }}</td>
+          <td><a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-sm btn-ghost">Otwórz</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📦</div>
+    <p>Brak produktów. Utwórz pierwszy produkt, wgrywając plik z mobidoc.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

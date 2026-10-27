@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AcceptaDoc{% endblock %} – System Akceptacji Dokumentacji</title>
+  <meta name="description" content="AcceptaDoc – system zarządzania i akceptacji dokumentacji technicznej produktów">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <script>window.APP_BASE = "{{ request.script_root }}";</script>
+</head>
+<body>
+{% if session.user_id %}
+{% set is_admin = 'Administrator' in session.get('roles', []) %}
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="{{ url_for('dashboard') }}" class="navbar-brand">
+      <span class="brand-icon">⬡</span>
+      <span class="brand-text">AcceptaDoc</span>
+    </a>
+
+    <div class="navbar-search">
+      <div class="search-wrap">
+        <input type="text" id="globalSearch" class="search-input" placeholder="Szukaj produktu…" autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </div>
+
+    <ul class="navbar-menu">
+      <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Panel</a></li>
+      <li><a href="{{ url_for('products') }}" class="nav-link {% if 'product' in request.endpoint %}active{% endif %}">Produkty</a></li>
+      <li><a href="{{ url_for('help_page') }}" class="nav-link {% if request.endpoint == 'help_page' %}active{% endif %}">Pomoc</a></li>
+      {% if is_admin %}
+      <li class="dropdown">
+        <button class="nav-link dropdown-toggle">Admin ▾</button>
+        <div class="dropdown-menu">
+          <a href="{{ url_for('admin_users') }}" class="dropdown-item">Użytkownicy</a>
+          <a href="{{ url_for('admin_log') }}" class="dropdown-item">Dziennik zdarzeń</a>
+        </div>
+      </li>
+      {% endif %}
+    </ul>
+
+    <div class="navbar-user">
+      <a href="{{ url_for('help_page') }}" class="nav-help" title="Pomoc">?</a>
+      <div class="user-bubble dropdown">
+        <button class="user-btn dropdown-toggle">
+          <span class="avatar">{{ session.full_name[0] }}</span>
+          <span class="user-info">
+            <span class="user-name">{{ session.full_name }}</span>
+            <span class="user-role">{{ session.get('roles', []) | join(' · ') }}</span>
+          </span>
+        </button>
+        <div class="dropdown-menu dropdown-right">
+          <a href="{{ url_for('profile') }}" class="dropdown-item">Mój profil</a>
+          <hr class="dropdown-divider">
+          <a href="{{ url_for('logout') }}" class="dropdown-item text-danger">Wyloguj</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<main class="main-content {% if not session.user_id %}full-width{% endif %}">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">
+          <span class="alert-icon">{% if cat == 'success' %}✓{% elif cat == 'danger' %}✗{% elif cat == 'warning' %}⚠{% else %}ℹ{% endif %}</span>
+          {{ msg }}
+          <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
