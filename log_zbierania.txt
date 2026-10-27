@@ -1,0 +1,212 @@
+========================================================================
+Start:   2026-10-21T07:22:29
+Źródło:  \\qnap\Z
+Cel:     C:\Users\K.Piaskowski\Desktop\dxf
+Maska:   ^^AI\d{3}-\d{4}-\d{3}.*\.dxf$  (prefiks 'AI' case-sensitive)
+Tryb:    kopiowanie
+========================================================================
+
+📡 Skanowanie źródła...
+  ... skanuję:  1200 katalogów |    4842 plików |   23 dopasowań
+  ... skanuję:  2800 katalogów |   12806 plików |   76 dopasowań
+  ... skanuję:  4000 katalogów |   17894 plików |   93 dopasowań
+  ... skanuję:  5300 katalogów |   26598 plików |  128 dopasowań
+  ... skanuję:  6700 katalogów |   33800 plików |  165 dopasowań
+  ... skanuję:  7900 katalogów |   44674 plików |  196 dopasowań
+  ... skanuję:  9100 katalogów |   51027 plików |  214 dopasowań
+  ... skanuję: 10400 katalogów |   56867 plików |  266 dopasowań
+  ... skanuję: 11900 katalogów |   63587 plików |  316 dopasowań
+  ... skanuję: 13300 katalogów |   69575 plików |  358 dopasowań
+  ... skanuję: 14900 katalogów |   76680 plików |  385 dopasowań
+  ... skanuję: 16400 katalogów |   84137 plików |  400 dopasowań
+  ... skanuję: 18200 katalogów |   85602 plików |  400 dopasowań
+  ... skanuję: 20100 katalogów |   87173 plików |  400 dopasowań
+  ... skanuję: 21700 katalogów |   88542 plików |  400 dopasowań
+  ... skanuję: 23600 katalogów |   90108 plików |  400 dopasowań
+  ... skanuję: 25700 katalogów |   91820 plików |  400 dopasowań
+  ... skanuję: 27800 katalogów |   93522 plików |  400 dopasowań
+  ... skanuję: 29600 katalogów |   94951 plików |  400 dopasowań
+  ... skanuję: 31600 katalogów |   96632 plików |  400 dopasowań
+  ... skanuję: 33600 katalogów |   98152 plików |  400 dopasowań
+  ... skanuję: 35500 katalogów |   99632 plików |  400 dopasowań
+  ... skanuję: 37600 katalogów |  101294 plików |  400 dopasowań
+  ... skanuję: 39700 katalogów |  103203 plików |  400 dopasowań
+  ... skanuję: 41700 katalogów |  105016 plików |  400 dopasowań
+  ... skanuję: 43700 katalogów |  106884 plików |  400 dopasowań
+  ... skanuję: 45700 katalogów |  108751 plików |  400 dopasowań
+  ... skanuję: 46400 katalogów |  118533 plików |  403 dopasowań
+  ... skanuję: 47600 katalogów |  125123 plików |  413 dopasowań
+  ... skanuję: 48500 katalogów |  134132 plików |  416 dopasowań
+  ... skanuję: 49500 katalogów |  140823 plików |  419 dopasowań
+  ... skanuję: 50100 katalogów |  151968 plików |  426 dopasowań
+  ... skanuję: 51200 katalogów |  168887 plików |  432 dopasowań
+  ... skanuję: 52300 katalogów |  177602 plików |  432 dopasowań
+  ... skanuję: 54300 katalogów |  180150 plików |  432 dopasowań
+  ... skanuję: 55800 katalogów |  191589 plików |  432 dopasowań
+  ... skanuję: 57200 katalogów |  201348 plików |  432 dopasowań
+  ... skanuję: 58900 katalogów |  214266 plików |  432 dopasowań
+  ... skanuję: 60600 katalogów |  222129 plików |  432 dopasowań
+  ... skanuję: 62200 katalogów |  234312 plików |  432 dopasowań
+  ... skanuję: 63800 katalogów |  248488 plików |  432 dopasowań
+  ... skanuję: 65400 katalogów |  259844 plików |  432 dopasowań
+  ... skanuję: 66900 katalogów |  272973 plików |  432 dopasowań
+  ... skanuję: 68400 katalogów |  287988 plików |  432 dopasowań
+  ... skanuję: 70200 katalogów |  298883 plików |  432 dopasowań
+  ... skanuję: 72000 katalogów |  309811 plików |  432 dopasowań
+  ... skanuję: 73400 katalogów |  318729 plików |  432 dopasowań
+  ... skanuję: 75300 katalogów |  328999 plików |  432 dopasowań
+  ... skanuję: 77200 katalogów |  339626 plików |  432 dopasowań
+  ... skanuję: 78900 katalogów |  353307 plików |  432 dopasowań
+  ... skanuję: 80500 katalogów |  366930 plików |  432 dopasowań
+  ... skanuję: 82000 katalogów |  380579 plików |  432 dopasowań
+  ... skanuję: 83500 katalogów |  394074 plików |  432 dopasowań
+  ... skanuję: 85100 katalogów |  420838 plików |  432 dopasowań
+  ... skanuję: 86800 katalogów |  429767 plików |  455 dopasowań
+  ... skanuję: 88200 katalogów |  433373 plików |  458 dopasowań
+  ... skanuję: 89500 katalogów |  437505 plików |  485 dopasowań
+  ... skanuję: 90800 katalogów |  445602 plików |  511 dopasowań
+  ... skanuję: 91900 katalogów |  452004 plików |  511 dopasowań
+  ... skanuję: 93200 katalogów |  460163 plików |  511 dopasowań
+  ... skanuję: 94300 katalogów |  464944 plików |  530 dopasowań
+  ... skanuję: 95700 katalogów |  470875 plików |  548 dopasowań
+  ... skanuję: 97100 katalogów |  476413 plików |  573 dopasowań
+  ... skanuję: 98600 katalogów |  482802 plików |  590 dopasowań
+  ... skanuję: 99800 katalogów |  488434 plików |  608 dopasowań
+  ... skanuję: 101400 katalogów |  496522 plików |  640 dopasowań
+  ... skanuję: 102300 katalogów |  512945 plików |  648 dopasowań
+  ... skanuję: 103700 katalogów |  519841 plików |  687 dopasowań
+  ... skanuję: 105100 katalogów |  525345 plików |  723 dopasowań
+  ... skanuję: 106100 katalogów |  536234 plików |  745 dopasowań
+  ... skanuję: 107400 katalogów |  543028 plików |  749 dopasowań
+  ... skanuję: 109200 katalogów |  548372 plików |  819 dopasowań
+  ... skanuję: 111000 katalogów |  556276 plików |  867 dopasowań
+  ... skanuję: 112200 katalogów |  562374 plików |  892 dopasowań
+  ... skanuję: 113400 katalogów |  568028 plików |  900 dopasowań
+  ... skanuję: 115000 katalogów |  575287 plików |  926 dopasowań
+  ... skanuję: 116200 katalogów |  582718 plików |  936 dopasowań
+  ... skanuję: 117500 katalogów |  594210 plików |  943 dopasowań
+  ... skanuję: 118900 katalogów |  601336 plików |  958 dopasowań
+  ... skanuję: 120400 katalogów |  604046 plików |  997 dopasowań
+  ... skanuję: 121400 katalogów |  613086 plików | 1001 dopasowań
+  ... skanuję: 122900 katalogów |  621389 plików | 1044 dopasowań
+  ... skanuję: 124300 katalogów |  631426 plików | 1073 dopasowań
+  ... skanuję: 125700 katalogów |  645517 plików | 1076 dopasowań
+  ... skanuję: 126900 katalogów |  655996 plików | 1095 dopasowań
+  ... skanuję: 128200 katalogów |  663436 plików | 1116 dopasowań
+  ... skanuję: 129900 katalogów |  671890 plików | 1116 dopasowań
+  ... skanuję: 131600 katalogów |  679399 plików | 1148 dopasowań
+  ... skanuję: 132700 katalogów |  686466 plików | 1158 dopasowań
+  ... skanuję: 133800 katalogów |  694289 plików | 1168 dopasowań
+  ... skanuję: 135400 katalogów |  700793 plików | 1213 dopasowań
+  ... skanuję: 137100 katalogów |  708785 plików | 1421 dopasowań
+  ... skanuję: 138100 katalogów |  714919 plików | 1446 dopasowań
+  ... skanuję: 139400 katalogów |  723888 plików | 1460 dopasowań
+  ... skanuję: 140500 katalogów |  731327 plików | 1485 dopasowań
+  ... skanuję: 142000 katalogów |  739740 plików | 1514 dopasowań
+  ... skanuję: 143500 katalogów |  747843 plików | 1532 dopasowań
+  ... skanuję: 144900 katalogów |  754674 plików | 1548 dopasowań
+  ... skanuję: 146100 katalogów |  761834 plików | 1600 dopasowań
+  ... skanuję: 147300 katalogów |  768475 plików | 1631 dopasowań
+  ... skanuję: 148100 katalogów |  774443 plików | 1631 dopasowań
+  ... skanuję: 149400 katalogów |  783294 plików | 1631 dopasowań
+  ... skanuję: 150600 katalogów |  790897 plików | 1631 dopasowań
+  ... skanuję: 151600 katalogów |  798262 plików | 1631 dopasowań
+  ... skanuję: 153000 katalogów |  805738 plików | 1669 dopasowań
+  ... skanuję: 154400 katalogów |  811694 plików | 1716 dopasowań
+  ... skanuję: 155500 katalogów |  818046 plików | 1746 dopasowań
+  ... skanuję: 157000 katalogów |  826607 plików | 1800 dopasowań
+  ... skanuję: 158500 katalogów |  834572 plików | 1854 dopasowań
+  ... skanuję: 159800 katalogów |  840599 plików | 1876 dopasowań
+  ... skanuję: 161200 katalogów |  847997 plików | 1889 dopasowań
+  ... skanuję: 163100 katalogów |  855232 plików | 1940 dopasowań
+  ... skanuję: 164500 katalogów |  863830 plików | 1942 dopasowań
+  ... skanuję: 165900 katalogów |  873918 plików | 1942 dopasowań
+  ... skanuję: 166900 katalogów |  883795 plików | 1942 dopasowań
+  ... skanuję: 168200 katalogów |  897538 plików | 1942 dopasowań
+  ... skanuję: 169200 katalogów |  912223 plików | 1942 dopasowań
+  ... skanuję: 170900 katalogów |  922000 plików | 1942 dopasowań
+  ... skanuję: 172200 katalogów |  933777 plików | 1942 dopasowań
+  ... skanuję: 173200 katalogów |  947872 plików | 1942 dopasowań
+  ... skanuję: 174800 katalogów |  956713 plików | 1942 dopasowań
+  ... skanuję: 176200 katalogów |  968233 plików | 1942 dopasowań
+  ... skanuję: 177400 katalogów |  982552 plików | 1942 dopasowań
+  ... skanuję: 178500 katalogów |  998232 plików | 1942 dopasowań
+  ... skanuję: 179600 katalogów | 1010723 plików | 1942 dopasowań
+  ... skanuję: 180800 katalogów | 1024612 plików | 1942 dopasowań
+  ... skanuję: 181900 katalogów | 1038653 plików | 1942 dopasowań
+
+✅ Znaleziono 1950 pasujących plików (unikalnych kodów: 926).
+   Przeskanowano: 1050254 plików razem.
+
+📥 Kopiowanie 1950 plików do: C:\Users\K.Piaskowski\Desktop\dxf
+  ... skopiowano 50/1950
+  ... skopiowano 100/1950
+  ... skopiowano 150/1950
+  ... skopiowano 200/1950
+  ... skopiowano 250/1950
+  ... skopiowano 300/1950
+  ... skopiowano 350/1950
+  ... skopiowano 400/1950
+  ... skopiowano 450/1950
+  ... skopiowano 500/1950
+  ... skopiowano 550/1950
+  ... skopiowano 600/1950
+  ... skopiowano 650/1950
+  ... skopiowano 700/1950
+  ... skopiowano 750/1950
+  ... skopiowano 800/1950
+  ... skopiowano 850/1950
+  ... skopiowano 900/1950
+  ... skopiowano 950/1950
+  ... skopiowano 1000/1950
+  ... skopiowano 1050/1950
+  ... skopiowano 1100/1950
+  ... skopiowano 1150/1950
+  ... skopiowano 1200/1950
+  ... skopiowano 1250/1950
+  ... skopiowano 1300/1950
+  ... skopiowano 1350/1950
+  ... skopiowano 1400/1950
+  ... skopiowano 1450/1950
+  ... skopiowano 1500/1950
+  ... skopiowano 1550/1950
+  ... skopiowano 1600/1950
+  ... skopiowano 1650/1950
+  ... skopiowano 1700/1950
+  ... skopiowano 1750/1950
+  ... skopiowano 1800/1950
+  ... skopiowano 1850/1950
+  ... skopiowano 1900/1950
+  ... skopiowano 1950/1950
+
+========================================================================
+PODSUMOWANIE
+========================================================================
+Czas:                 690.9 s
+Znaleziono plików:    1950
+Unikalnych kodów:     926
+Skopiowano:           1950
+Nadpisano (kolizje):  678
+
+⚠️  21 nazw wystąpiło wielokrotnie (ostatni wygrał):
+   • AI000-0000-000.dxf: 38 źródeł
+   • AI000-0126-001.dxf: 623 źródeł
+   • AI016-0525-001_1.dxf: 2 źródeł
+   • AI016-0525-001_2.dxf: 2 źródeł
+   • AI024-0720-001.dxf: 2 źródeł
+   • AI029-0226-006_1.dxf: 2 źródeł
+   • AI029-0226-006_2.dxf: 2 źródeł
+   • AI038-0425-001.dxf: 2 źródeł
+   • AI044-0120-007 _1.dxf: 2 źródeł
+   • AI044-1119-004 _ 1.dxf: 2 źródeł
+   • AI055-1124-001_3.dxf: 2 źródeł
+   • AI064-0825-001_1.dxf: 2 źródeł
+   • AI064-0825-001_2.dxf: 2 źródeł
+   • AI064-0825-001_3.dxf: 2 źródeł
+   • AI064-0825-001_4.dxf: 2 źródeł
+   • AI066-1119-089.dxf: 2 źródeł
+   • AI076-0220-004.dxf: 2 źródeł
+   • AI128-1223-001.dxf: 2 źródeł
+   • AI296-1024-002.dxf: 2 źródeł
+   • AI353-0525-002.dxf: 2 źródeł
+   ... i 1 więcej (pełna lista w logu niżej).
