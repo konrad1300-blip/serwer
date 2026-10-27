@@ -1,0 +1,1 @@
+"""Skrypty pomocnicze (cron, administracja) — pakiet bez logiki."""
